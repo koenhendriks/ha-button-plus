@@ -1,0 +1,167 @@
+{
+    "info": { 
+        "largedisplay": 3, 
+        "i2cs": [], 
+        "connectors": [ 
+            {
+                "id": 3,  
+                "type": 2 
+            },
+            {
+                "id": 4,
+                "type": 1 
+            }
+        ],
+        "sensors": [] 
+    },
+    "core": {
+        "name": "demo3", 
+        "location": "Living Room", 
+        "color": 15140872, 
+        "invert": true 
+    },
+    "mqttbuttons": [ 
+        {
+            "id": 0,   
+            "label": "Btn 0",
+            "topics": []
+        },
+        {
+            "id": 1,
+            "label": "Btn 1",
+            "topics": []
+        },
+        {
+            "id": 2,
+            "label": "Btn 2",
+            "topics": []
+        },
+        {
+            "id": 3,
+            "label": "Btn 3",
+            "topics": []
+        },
+        {
+            "id": 4,
+            "label": "Btn 4",
+            "topics": []
+        },
+        {
+            "id": 5,
+            "label": "Btn 5",
+            "topics": []
+        },
+        {
+            "id": 6, 
+            "label": "Btn 8", 
+            "topics": [ 
+                {
+                    "brokerid": "buttonplus",
+                    "topic": "buttonplus/abc",
+                    "payload": "dummy",
+                    "eventtype": 0 
+                }
+            ]
+        },
+        {
+            "id": 7,
+            "topics": []
+        },
+        {
+            "id": 8,
+            "label": "Tolomeo lamp",
+            "topics": [
+                {
+                    "brokerid": "buttonplus",
+                    "topic": "buttonplus/demo/tolomeo",
+                    "payload": "ON",
+                    "eventtype": 14
+                },
+                {
+                    "brokerid": "buttonplus",
+                    "topic": "buttonplus/demo/tolomeo/toggle",
+                    "eventtype": 0
+                }
+            ]
+        },
+        {
+            "id": 9,
+            "label": "Like",
+            "topics": [
+                {
+                    "brokerid": "buttonplus",
+                    "topic": "buttonplus/like",
+                    "eventtype": 0
+                }
+            ]
+        }
+    ],
+    "mqttdisplays": [ 
+        {
+            "x": 0, 
+            "y": 0, 
+            "fontsize": 4, 
+            "align": 0,
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            "width": 60, 
+            "label": "Central European Time",
+            "round": 0, 
+            "topics": [
+                { 
+                    "brokerid": "buttonplus",
+                    "topic": "system/datetime/amsterdam",
+                    "eventtype": 15
+                }
+            ]
+        },
+        {
+            "x": 0,
+            "y": 70,
+            "fontsize": 1,
+            "align": 0,
+            "width": 100,
+            "label": "BBC Tech",
+            "round": 0,
+            "topics": [
+                {
+                    "brokerid": "buttonplus",
+                    "topic": "buttonplus/rss/bbctech",
+                    "eventtype": 15
+                }
+            ]
+        },
+        {
+            "x": 0,
+            "y": 40,
+            "fontsize": 2,
+            "align": "0",
+            "width": 40,
+            "label": "Button+ Likes",
+            "topics": [
+                {
+                    "brokerid": "buttonplus",
+                    "topic": "buttonplus/likes",
+                    "eventtype": 15
+                }
+            ]
+        }
+    ],
+    "mqttbrokers": [ 
+        {
+            "brokerid": "buttonplus",
+            "url": "mqtt://brokerurl/",
+            "port": 0,
+            "wsport": 0
+        }
+    ],
+    "mqttsensors": []
+}

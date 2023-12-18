@@ -1,0 +1,181 @@
+{
+    "info": { 
+        "largedisplay": 3, // on which connector the large display is hooked up?
+        "i2cs": [], // serial communication data probably
+        "connectors": [ // Which button+ modules are attached after the screen and the 2 buttons
+            {
+                "id": 3,  // connector id, in this case the largedisplay
+                "type": 2 // I'm assuming this is some sort of unique type, for example type = 2 means buttons on display
+            },
+            {
+                "id": 4,
+                "type": 1 // I'm assuming this means default button component (1 left, 1 right)
+            }
+        ],
+        "sensors": [] // future sensors on the esp32 probably will be in this array
+    },
+    "core": {
+        "name": "demo3", // Button+ set name
+        "location": "Living Room", // location where its found 
+        "color": 15140872, // 24 bit integer representation of the main color
+        "invert": true // wether to invert colors
+    },
+    "mqttbuttons": [ // all possible available button configurations with what mqtt to publish or subscribe
+        {
+            "id": 0,   
+            "label": "Btn 0",
+            "topics": []
+        },
+        {
+            "id": 1,
+            "label": "Btn 1",
+            "topics": []
+        },
+        {
+            "id": 2,
+            "label": "Btn 2",
+            "topics": []
+        },
+        {
+            "id": 3,
+            "label": "Btn 3",
+            "topics": []
+        },
+        {
+            "id": 4,
+            "label": "Btn 4",
+            "topics": []
+        },
+        {
+            "id": 5,
+            "label": "Btn 5",
+            "topics": []
+        },
+        {
+            "id": 6, // not following this id scheme yet, the left display button has id 6 for some reason. probably going over each connector and its type 
+            "label": "Btn 8", // label of this button
+            "topics": [ // array of mqtt topics to publish or subscribe
+                {
+                    "brokerid": "buttonplus",
+                    "topic": "buttonplus/abc",
+                    "payload": "dummy",
+                    "eventtype": 0 
+                    // different types of event we can have topics for in mqtt:
+                    // 0 = 'Click'
+                    // 1 = 'Long press'
+                    // 8 = 'Blue LED'
+                    // 9 = 'Red LED'
+                    // 10 = 'Green LED'
+                    // 11 = 'Label'
+                    // 12 = 'Toplabel'
+                    // 13 = 'RGB Led'
+                    // 14 = 'Led'
+                    // 15 = 'Value'
+                    // 16 = 'Label'
+                    // 17 = 'Unit'
+                    // 18 = 'Sensor value'
+                }
+            ]
+        },
+        {
+            "id": 7,
+            "topics": []
+        },
+        {
+            "id": 8,
+            "label": "Tolomeo lamp",
+            "topics": [
+                {
+                    "brokerid": "buttonplus",
+                    "topic": "buttonplus/demo/tolomeo",
+                    "payload": "ON",
+                    "eventtype": 14
+                },
+                {
+                    "brokerid": "buttonplus",
+                    "topic": "buttonplus/demo/tolomeo/toggle",
+                    "eventtype": 0
+                }
+            ]
+        },
+        {
+            "id": 9,
+            "label": "Like",
+            "topics": [
+                {
+                    "brokerid": "buttonplus",
+                    "topic": "buttonplus/like",
+                    "eventtype": 0
+                }
+            ]
+        }
+    ],
+    "mqttdisplays": [ // config for the largedisplay
+        {
+            "x": 0, // Horizontal postion of the item within the lcd (in % of the display width)
+            "y": 0, // Vertical postion of the item within the lcd (in % of the display width)
+            "fontsize": 4, // self explanatory
+            "align": 0,
+            // alignment for the text on the display using the following integers as map:
+            // 0 = 'Top Left'
+            // 1 = 'Top Center'
+            // 2 = 'Top Right'
+            // 3 = 'Center Left'
+            // 4 = 'Center Center'
+            // 5 = 'Center Right'
+            // 6 = 'Bottom Left'
+            // 7 = 'Bottom Center'
+            // 8 = 'Bottom Right'    
+            "width": 60, // in % of the display width
+            "label": "Central European Time",
+            "round": 0, // Round the incoming payload to decimal places, 0 is round to whole numbers
+            "topics": [
+                { // The mqtt topic to set as display data.
+                    "brokerid": "buttonplus",
+                    "topic": "system/datetime/amsterdam",
+                    "eventtype": 15
+                }
+            ]
+        },
+        {
+            "x": 0,
+            "y": 70,
+            "fontsize": 1,
+            "align": 0,
+            "width": 100,
+            "label": "BBC Tech",
+            "round": 0,
+            "topics": [
+                {
+                    "brokerid": "buttonplus",
+                    "topic": "buttonplus/rss/bbctech",
+                    "eventtype": 15
+                }
+            ]
+        },
+        {
+            "x": 0,
+            "y": 40,
+            "fontsize": 2,
+            "align": "0",
+            "width": 40,
+            "label": "Button+ Likes",
+            "topics": [
+                {
+                    "brokerid": "buttonplus",
+                    "topic": "buttonplus/likes",
+                    "eventtype": 15
+                }
+            ]
+        }
+    ],
+    "mqttbrokers": [ // list of mqtt brokers to connect to
+        {
+            "brokerid": "buttonplus",
+            "url": "mqtt://mqtt.button.plus",
+            "port": 0,
+            "wsport": 0
+        }
+    ],
+    "mqttsensors": []
+}
