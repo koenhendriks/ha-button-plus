@@ -1,20 +1,36 @@
 {
   "config": {
     "abort": {
-      "already_configured": "[%key:common::config_flow::abort::already_configured_device%]"
+      "already_configured": "Service is already configured",
+      "existing_instance_updated": "Updated existing configuration."
     },
     "error": {
-      "cannot_connect": "[%key:common::config_flow::error::cannot_connect%]",
-      "invalid_auth": "[%key:common::config_flow::error::invalid_auth%]",
-      "unknown": "[%key:common::config_flow::error::unknown%]"
+      "cannot_connect": "Failed to connect",
+      "button_plus_connection": "Error connecting or reading from https://api.button.plus/ See log for more info"
     },
     "step": {
-      "user": {
+      "fetch_website": {
         "data": {
-          "host": "[%key:common::config_flow::data::host%]",
-          "password": "[%key:common::config_flow::data::password%]",
-          "username": "[%key:common::config_flow::data::username%]"
-        }
+          "cookie": "Auth Cookie"
+        },
+        "data_description": {
+          "cookie": "Paste the entire cookie content including auth_cookie="
+        },
+        "description": "Please enter the Auth Cookie after login in on https://button.plus/"
+      },
+      "user": {
+        "menu_options": {
+          "fetch_website": "Fetch from Button.plus website",
+          "manual": "Manually enter local IP"
+        },
+        "data": {
+          "host": "Host or IP",
+          "port": "Port"
+        },
+        "data_description": {
+          "host": "The hostname or IP address of the Button+ base module."
+        },
+        "description": "Pick the desired option to setup your Button+ devices."
       }
     }
   }

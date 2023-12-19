@@ -8,6 +8,7 @@ import random
 from typing import Callable
 
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import aiohttp_client
 
 from .button_plus_api import ApiClient
 
@@ -20,14 +21,15 @@ class ButtonPlusHub:
     identifier = "button_plus_hub"
     manufacturer = "Button+"
 
-    def __init__(self, hass: HomeAssistant, cookie: str) -> None:
+    def __init__(self, hass: HomeAssistant, config, cookie) -> None:
         self._hass = hass
-        self._cookie = cookie
-        self._name = self.identifier
-        self._id = self.identifier
-        self._client = ApiClient(cookie)
-        self.online = False
+        self._config = config
+        self._name = config.get("Name", "Unnamed Config")
+        self._id = f"{self._name}-{config.get('Id')}"
+        self._client = ApiClient(cookie, aiohttp_client.async_get_clientsession(hass))
+        self.online = True
         self.devices = []
+        self.devices.append(ButtonPlusBase(config.get('Id'), self._name, self))
 
     async def init(self):
         configs = await self._client.fetch_configs()
@@ -36,9 +38,6 @@ class ButtonPlusHub:
         for index, config in enumerate(data):
             default_ip = f"Unknown IP {index}"
             default_name = f"No name {index}"
-            _LOGGER.debug(
-                f"ID: {config.get('Id')}, IP: {config.get('IpAddress')} Name: {config.get('Name')} ")
-
             self.devices.append(ButtonPlusBase(config.get('Id'), config.get('Name'), self))
 
         return self

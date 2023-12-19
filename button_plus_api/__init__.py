@@ -9,11 +9,14 @@ _LOGGER: logging.Logger = logging.getLogger(__package__)
 
 
 class ApiClient:
-    """ Client to talk to Button+ device """
+    """ Client to talk to Button+ website """
 
-    def __init__(self, cookie=str) -> None:
+    def __init__(self, cookie, session) -> None:
+        _LOGGER.debug(f"DEBUG CONFIG {cookie}")
         self._base = "https://api.button.plus"
+        self._session = session
         self._cookie = cookie
+        # self._cookie = "auth_cookie=CfDJ8KxSTRGhdu5Ij0f2XBebb3IoOm00duFgz7QqDrTUzkwsNvOlrLR-cfN-MCJ5S-Cg4quekLi3OsYzt-EqpjngzwvwIrxz5qlflafl_VCSvn8Pr34DMoqDruO7TQX59T5R_woa9upCTVd7vr2vTUUkztglxfEwjJgQ0gUDBu5pMWxTBTzBlUFxMAC8HaMjBnXcGNkmYqYChXvigg7fuwjrHINjsQ01uv0435u58ujKAel0LwzQiKjXMfw5rMAxAAQVZqaUD8Z80OifUAERr8YBvUvxnEysmeOWQwEnGe6afuZJ"
         self._headers = {
             'authority': 'api.button.plus',
             'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
@@ -24,16 +27,21 @@ class ApiClient:
 
         _LOGGER.debug(f"Initialize Button+ API client (NEW)")
 
+    async def test_connection(self):
+        url = f"{self._base}/button/buttons"
+        _LOGGER.debug(f"test_connection on {url}")
+        async with self._session.get(url, headers=self._headers) as response:
+            _LOGGER.debug(f"Fetch website validation = {response.status} {response}")
+            return 200 <= response.status < 300
+
     async def fetch_config(self, config=int):
         url = f"{self._base}/button/config/{config}"
         _LOGGER.debug(f"fetch_config {url}")
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url, headers=self._headers) as response:
-                return await response.text()
+        async with self._session.get(url, headers=self._headers) as response:
+            return await response.text()
 
     async def fetch_configs(self):
         url = f"{self._base}/button/buttons"
         _LOGGER.debug(f"fetch_configs {url}")
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url, headers=self._headers) as response:
-                return await response.text()
+        async with self._session.get(url, headers=self._headers) as response:
+            return await response.text()

@@ -19,10 +19,10 @@ PLATFORMS: list[str] = ["switch", "sensor"]
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Button+ from a config entry."""
-
+    _LOGGER.debug(f" init entry from {entry.data}")
     # Store an instance of the "connecting" class that does the work of speaking
     # with your actual devices.
-    hub = ButtonPlusHub(hass, entry.data["cookie"])
+    hub = ButtonPlusHub(hass, entry.data["config"], entry.data["auth"])
     hub = await hub.init()
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = hub
 
