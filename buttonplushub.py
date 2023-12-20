@@ -22,6 +22,7 @@ class ButtonPlusHub:
     manufacturer = "Button+"
 
     def __init__(self, hass: HomeAssistant, config, cookie) -> None:
+        _LOGGER.debug(f"New hub with config {config}")
         self._hass = hass
         self._config = config
         self._name = config.get("Name", "Unnamed Config")

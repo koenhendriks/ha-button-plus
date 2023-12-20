@@ -50,18 +50,26 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
                 if valid:
                     json_response = await api_client.fetch_configs()
-                    configs = json.loads(json_response)
-
-                    _LOGGER.debug(f"loaded configs: {configs}")
-
+                    devices = json.loads(json_response)
                     last_entry = None
-                    for config in configs:
-                        config_name = config.get("Name", "Unnamed Config")
-                        config_id = config.get("Id")
+
+                    total_devices = len(devices)
+                    _LOGGER.info(f"Found {total_devices} devices from Button+ website")
+
+                    for device in devices:
+                        device_website_id = device.get("Id")
+                        device_ip = device.get('IpAddress');
+
+                        if not device_ip:
+                            _LOGGER.warning(f"Skipping device {device_website_id}, it has no IP so must be virtual")
+                            continue
+
+                        _LOGGER.debug(f"loaded device from website with id: {device_website_id} and ip {device_ip}")
+                        device_config = json.loads(device.get("Json"))
                         last_entry = self.async_create_entry(
-                            title=config_name,
-                            description=f"Base module with config {config_id}",
-                            data={"config": config, "auth": user_input['cookie']}
+                            title=f"button+ {device_website_id}",
+                            description=f"Base module with website id {device_website_id}",
+                            data=device_config
                         )
 
                     return last_entry
