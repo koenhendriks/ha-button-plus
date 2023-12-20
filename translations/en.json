@@ -20,8 +20,8 @@
       },
       "user": {
         "menu_options": {
-          "fetch_website": "Fetch from Button.plus website",
-          "manual": "Manually enter local IP"
+          "fetch_website": "Fetch all devices from Button.plus website",
+          "manual": "Manually enter single device by local IP"
         },
         "data": {
           "host": "Host or IP",
