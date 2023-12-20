@@ -9,7 +9,7 @@ from json import JSONDecodeError
 
 import voluptuous as vol
 from homeassistant import config_entries, exceptions
-from homeassistant.const import CONF_IP_ADDRESS
+from homeassistant.const import CONF_IP_ADDRESS, CONF_EMAIL, CONF_PASSWORD
 from homeassistant.helpers import aiohttp_client
 
 from .const import DOMAIN  # pylint:disable=unused-import
@@ -93,7 +93,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         if user_input is not None:
             try:
-                api_client = ApiClient(user_input['cookie'], aiohttp_client.async_get_clientsession(self.hass))
+                api_client = await self.setup_api_client(user_input)
 
                 valid = await api_client.test_connection()
 
@@ -147,9 +147,20 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         return self.async_show_form(
             step_id="fetch_website",
-            data_schema=vol.Schema({"cookie": str}),
+            data_schema=vol.Schema({CONF_EMAIL: str, CONF_PASSWORD: str, "cookie": str}),
             errors=errors
         )
+
+    async def setup_api_client(self, user_input):
+        _LOGGER.debug(f"Setting up API client with {user_input}")
+
+        if "cookie" not in user_input:
+            client = ApiClient(aiohttp_client.async_get_clientsession(self.hass))
+            cookie = await client.get_cookie_from_login(user_input.get('email'), user_input.get('password'))
+        else:
+            cookie = user_input.get("cookie")
+
+        return ApiClient(aiohttp_client.async_get_clientsession(self.hass), cookie)
 
     def validate_ip(self, ip) -> bool:
         try:

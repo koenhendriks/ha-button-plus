@@ -12,12 +12,14 @@
     "step": {
       "fetch_website": {
         "data": {
-          "cookie": "Auth Cookie"
+          "cookie": "Auth Cookie",
+          "email": "Email",
+          "password": "Password"
         },
         "data_description": {
-          "cookie": "Paste the entire cookie content including auth_cookie="
+          "cookie": "Optional, can be used instead of login. If used, paste the entire cookie content including auth_cookie="
         },
-        "description": "Please enter the Auth Cookie after login in on https://button.plus/"
+        "description": "Either enter your login info for button plus or enter the Auth Cookie after login in on https://button.plus/"
       },
       "manual": {
         "data": {
@@ -32,13 +34,6 @@
         "menu_options": {
           "fetch_website": "Fetch all devices from Button.plus website",
           "manual": "Manually enter single device by local IP"
-        },
-        "data": {
-          "host": "Host or IP",
-          "port": "Port"
-        },
-        "data_description": {
-          "host": "The hostname or IP address of the Button+ base module."
         },
         "description": "Pick the desired option to setup your Button+ devices."
       }
