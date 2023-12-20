@@ -6,7 +6,8 @@
     },
     "error": {
       "cannot_connect": "Failed to connect",
-      "button_plus_connection": "Error connecting or reading from https://api.button.plus/ See log for more info"
+      "button_plus_connection": "Error connecting or reading from https://api.button.plus/ See log for more info",
+      "invalid_ip": "The IP ' {ip} ' is not a valid IPv4 address."
     },
     "step": {
       "fetch_website": {
@@ -17,6 +18,15 @@
           "cookie": "Paste the entire cookie content including auth_cookie="
         },
         "description": "Please enter the Auth Cookie after login in on https://button.plus/"
+      },
+      "manual": {
+        "data": {
+          "ip_address": "IP Address"
+        },
+        "data_description": {
+          "ip_address": "Button+ IP address (as seen on the bottom left of the display)"
+        },
+        "description": "Manually enter Button+ device IP address"
       },
       "user": {
         "menu_options": {
