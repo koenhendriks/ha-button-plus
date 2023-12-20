@@ -16,7 +16,6 @@ class ApiClient:
         self._base = "https://api.button.plus"
         self._session = session
         self._cookie = cookie
-        # self._cookie = "auth_cookie=CfDJ8KxSTRGhdu5Ij0f2XBebb3IoOm00duFgz7QqDrTUzkwsNvOlrLR-cfN-MCJ5S-Cg4quekLi3OsYzt-EqpjngzwvwIrxz5qlflafl_VCSvn8Pr34DMoqDruO7TQX59T5R_woa9upCTVd7vr2vTUUkztglxfEwjJgQ0gUDBu5pMWxTBTzBlUFxMAC8HaMjBnXcGNkmYqYChXvigg7fuwjrHINjsQ01uv0435u58ujKAel0LwzQiKjXMfw5rMAxAAQVZqaUD8Z80OifUAERr8YBvUvxnEysmeOWQwEnGe6afuZJ"
         self._headers = {
             'authority': 'api.button.plus',
             'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
@@ -25,7 +24,7 @@ class ApiClient:
             'cookie': self._cookie,
         }
 
-        _LOGGER.debug(f"Initialize Button+ API client (NEW)")
+        _LOGGER.debug(f"Initialize Button+ API client")
 
     async def test_connection(self):
         url = f"{self._base}/button/buttons"
