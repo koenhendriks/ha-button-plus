@@ -1,11 +1,8 @@
-""" Button+ API client and utilities"""
 from __future__ import annotations
 
 import json
 import re
 import logging
-
-import aiohttp
 
 _LOGGER: logging.Logger = logging.getLogger(__package__)
 

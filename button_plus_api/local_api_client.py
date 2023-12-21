@@ -1,4 +1,3 @@
-""" Button+ API client and utilities"""
 from __future__ import annotations
 
 import logging
@@ -8,7 +7,7 @@ import aiohttp
 _LOGGER: logging.Logger = logging.getLogger(__package__)
 
 
-class ApiClient:
+class LocalApiClient:
     """ Client to talk to Button+ local devices """
 
     def __init__(self, ip_address, session) -> None:
