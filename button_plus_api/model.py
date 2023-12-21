@@ -101,9 +101,20 @@ class DeviceConfiguration:
 
     @staticmethod
     def from_json(json_data: str) -> 'DeviceConfiguration':
-        """
-        Parses a JSON string representing the device configuration and returns
-        an instance of DeviceConfiguration.
-        """
+        """ Parses a JSON string representing the device configuration """
         data = json.loads(json_data)
         return DeviceConfiguration(**data)
+
+    def to_json(self) -> str:
+        """ Converts the DeviceConfiguration instance back into a JSON string. """
+
+        def serialize(obj):
+            """
+            A helper function for json.dumps to serialize custom objects.
+            """
+            if hasattr(obj, '__dict__'):
+                return obj.__dict__
+            else:
+                return str(obj)
+
+        return json.dumps(self, default=serialize, indent=4)
