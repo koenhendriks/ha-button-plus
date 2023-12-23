@@ -14,6 +14,7 @@ from homeassistant.const import (
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import UndefinedType
+from . import ButtonPlusHub
 
 from .const import DOMAIN
 
@@ -32,23 +33,12 @@ async def async_setup_entry(
         async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Add switches for passed config_entry in HA."""
-    # The hub is loaded from the associated hass.data entry that was created in the
-    # __init__.async_setup_entry function
-    _LOGGER.debug(f"{DOMAIN} - hass config loaded - config: {config_entry}")
 
-    hub = hass.data[DOMAIN][config_entry.entry_id]
+    hub: ButtonPlusHub = hass.data[DOMAIN][config_entry.entry_id]
+    buttons = hub.config.mqtt_buttons
 
-    for base in hub.devices:
-        _LOGGER.debug(f"base id: {base.button_plus_base_id}")
-
-        bp_config = await base.hub.client.fetch_config(base.button_plus_base_id)
-
-        data = json.loads(bp_config)
-        buttons = data['mqttbuttons']
-        # _LOGGER.debug(f"{DOMAIN} - fetched buttons: {buttons}")
-
-        for button in buttons:
-            switches.append(ButtonPlusSwitch(button['id'], button.get('label', 'No label'), base.button_plus_base_id))
+    for button in buttons:
+        switches.append(ButtonPlusSwitch(button.button_id, button.label, hub.hub_id))
 
     async_add_entities(switches)
 
@@ -60,8 +50,8 @@ class ButtonPlusSwitch(SwitchEntity):
     def __init__(self, btn_id, btn_label, hub_id):
         self._is_on = False
         self._attr_unique_id = f'bp-{hub_id}-{btn_id}'
-        self._attr_name = btn_label
         self._hub_id = hub_id
+        self._attr_name = btn_label
         self._device_class = SwitchDeviceClass.SWITCH
 
     @property
