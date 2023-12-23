@@ -39,9 +39,9 @@ class ButtonPlusSwitch(SwitchEntity):
 
     def __init__(self, btn_id, btn_label, hub_id):
         self._is_on = False
-        self._attr_unique_id = f'bp-{hub_id}-{btn_id}'
+        self._attr_unique_id = f'switch-{hub_id}-{btn_id}'
         self._hub_id = hub_id
-        self._attr_name = btn_label
+        self._attr_name = btn_id
         self._device_class = SwitchDeviceClass.SWITCH
 
     @property
