@@ -13,6 +13,7 @@ from homeassistant.const import CONF_IP_ADDRESS, CONF_EMAIL, CONF_PASSWORD
 from homeassistant.helpers import aiohttp_client
 from .button_plus_api.api_client import ApiClient
 from .button_plus_api.local_api_client import LocalApiClient
+from .button_plus_api.model import DeviceConfiguration
 
 from .const import DOMAIN  # pylint:disable=unused-import
 
@@ -21,7 +22,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    """Handle a config flow for Hello World."""
+    """Handle a config flow for Button+."""
 
     VERSION = 1
     CONNECTION_CLASS = config_entries.CONN_CLASS_LOCAL_PUSH
@@ -45,16 +46,12 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     _LOGGER.debug(f"Fetching button+ device at {ip}")
                     api_client = LocalApiClient(ip, aiohttp_client.async_get_clientsession(self.hass))
                     json_config = await api_client.fetch_config()
-                    config = json.loads(json_config)
-                    device_name = config.get('core').get('name')
-                    device_id = config.get('info').get('id')
-
-                    _LOGGER.debug(f"Local config found with device {device_name} and id {device_id}")
+                    device_config: DeviceConfiguration = DeviceConfiguration.from_json(json_config)
 
                     return self.async_create_entry(
-                        title=f"{device_name}",
-                        description=f"Base module on {ip} with id {device_id}",
-                        data=config
+                        title=f"{device_config.core.name}",
+                        description=f"Base module on {ip} with id {device_config.info.device_id}",
+                        data={"config": json_config}
                     )
 
                 except JSONDecodeError as ex:  # pylint: disable=broad-except
