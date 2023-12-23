@@ -7,7 +7,6 @@ from homeassistant.components.switch import (SwitchEntity, SwitchDeviceClass)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.typing import UndefinedType
 from . import ButtonPlusHub
 
 from .const import DOMAIN
@@ -41,12 +40,14 @@ class ButtonPlusSwitch(SwitchEntity):
         self._is_on = False
         self._attr_unique_id = f'switch-{hub_id}-{btn_id}'
         self._hub_id = hub_id
-        self._attr_name = btn_id
+        self._attr_name = f'switch-{btn_id}'
+        self._name = btn_label
         self._device_class = SwitchDeviceClass.SWITCH
 
     @property
-    def name(self) -> str | UndefinedType | None:
-        return self._attr_name
+    def name(self) -> str:
+        """Return the display name of this light."""
+        return self._name
 
     @property
     def device_info(self):
