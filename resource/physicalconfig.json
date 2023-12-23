@@ -2,7 +2,7 @@
     "info": {
         "id": "btn_4967c8",
         "mac": "F4:12:FA:49:67:C8",
-        "ipaddress": "192.168.2.15",
+        "ipaddress": "192.168.2.17",
         "firmware": "1.03",
         "largedisplay": 0,
         "connectors": [
@@ -31,15 +31,15 @@
         ]
     },
     "core": {
-        "name": "DevButtonPlus",
+        "name": "DevButtonPluss",
         "location": "Livingroom",
-        "invert": true,
+        "invert": false,
         "autobackup": true,
         "brightnesslargedisplay": 100,
         "brightnessminidisplay": 100,
         "ledcolorfront": 0,
         "ledcolorwall": 0,
-        "color": 0
+        "color": 6579300
     },
     "mqttbuttons": [
         {
@@ -62,8 +62,8 @@
             "id": 2,
             "label": "Btn 1 left",
             "toplabel": "Label 1 left",
-            "ledcolorfront": 0,
-            "ledcolorwall": 0,
+            "ledcolorfront": 16711680,
+            "ledcolorwall": 2818303,
             "topics": []
         },
         {
@@ -114,7 +114,7 @@
             "fontsize": 4,
             "align": 0,
             "width": 50,
-            "label": "Amsterdam",
+            "label": "Time",
             "unit": "",
             "round": 0,
             "topics": [
