@@ -2,15 +2,15 @@
 from __future__ import annotations
 
 import asyncio
-import json
 import logging
 import random
 from typing import Callable
 
+from .button_plus_api.local_api_client import LocalApiClient
+from .button_plus_api.model import DeviceConfiguration
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import aiohttp_client
 
-from .button_plus_api import ApiClient
 
 _LOGGER: logging.Logger = logging.getLogger(__package__)
 
@@ -21,30 +21,19 @@ class ButtonPlusHub:
     identifier = "button_plus_hub"
     manufacturer = "Button+"
 
-    def __init__(self, hass: HomeAssistant, config, cookie) -> None:
-        _LOGGER.debug(f"New hub with config {config}")
+    def __init__(self, hass: HomeAssistant, config: DeviceConfiguration) -> None:
+        _LOGGER.debug(f"New hub with config {config.core}")
         self._hass = hass
         self._config = config
-        self._name = config.get("Name", "Unnamed Config")
-        self._id = f"{self._name}-{config.get('Id')}"
-        self._client = ApiClient(cookie, aiohttp_client.async_get_clientsession(hass))
+        self._name = config.core.name
+        self._id = config.info.device_id
+        self._client = LocalApiClient(config.info.ip_address, aiohttp_client.async_get_clientsession(hass))
         self.online = True
         self.devices = []
-        self.devices.append(ButtonPlusBase(config.get('Id'), self._name, self))
-
-    async def init(self):
-        configs = await self._client.fetch_configs()
-        data = json.loads(configs)
-        _LOGGER.debug(f"Found configurations for Button+:")
-        for index, config in enumerate(data):
-            default_ip = f"Unknown IP {index}"
-            default_name = f"No name {index}"
-            self.devices.append(ButtonPlusBase(config.get('Id'), config.get('Name'), self))
-
-        return self
+        self.devices.append(ButtonPlusBase(config, self))
 
     @property
-    def client(self) -> ApiClient:
+    def client(self) -> LocalApiClient:
         """Return Button+ API client"""
         return self._client
 
@@ -60,17 +49,18 @@ class ButtonPlusHub:
 class ButtonPlusBase:
     """ Button+ Base device"""
 
-    def __init__(self, button_plus_base_id: str, name: str, hub: ButtonPlusHub) -> None:
+    def __init__(self, config: DeviceConfiguration, hub: ButtonPlusHub) -> None:
         """Init dummy button_plus_base."""
-        self._id = button_plus_base_id
+        self._id = config.info.device_id
         self.hub = hub
-        self.name = name
+        self._config = config
+        self.name = config.core.name
         self._callbacks = set()
         self._loop = asyncio.get_event_loop()
         self._target_position = 100
         self._current_position = 100
 
-        self.firmware_version = f"0.0.{random.randint(1, 9)}"
+        self.firmware_version = config.info.firmware
         self.model = "Base Module"
 
     @property

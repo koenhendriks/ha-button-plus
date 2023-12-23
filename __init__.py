@@ -7,6 +7,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 
 from . import buttonplushub
+from .button_plus_api.model import DeviceConfiguration
 from .buttonplushub import ButtonPlusHub
 from .const import DOMAIN
 
@@ -14,16 +15,15 @@ _LOGGER = logging.getLogger(__name__)
 
 # List of platforms to support. There should be a matching .py file for each,
 # eg <cover.py> and <sensor.py>
-PLATFORMS: list[str] = ["switch", "sensor"]
+PLATFORMS: list[str] = []
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Button+ from a config entry."""
-    _LOGGER.debug(f" init entry from {entry.data}")
-    # Store an instance of the "connecting" class that does the work of speaking
-    # with your actual devices.
-    hub = ButtonPlusHub(hass, entry.data["config"], entry.data["auth"])
-    hub = await hub.init()
+    _LOGGER.debug(f"Button+ init got new device entry! {entry.entry_id.title}")
+    device_configuration: DeviceConfiguration = DeviceConfiguration.from_json(entry.data.get("config"))
+
+    hub = ButtonPlusHub(hass, device_configuration)
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = hub
 
     # This creates each HA object for each platform your device requires.
