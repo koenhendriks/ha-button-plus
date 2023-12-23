@@ -21,7 +21,7 @@ from .const import DOMAIN  # pylint:disable=unused-import
 _LOGGER = logging.getLogger(__name__)
 
 
-class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+class ConfigFlow(config_entries.ConfigFlow,                 domain=DOMAIN):
     """Handle a config flow for Button+."""
 
     VERSION = 1

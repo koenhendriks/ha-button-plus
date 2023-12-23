@@ -15,7 +15,7 @@ _LOGGER = logging.getLogger(__name__)
 
 # List of platforms to support. There should be a matching .py file for each,
 # eg <cover.py> and <sensor.py>
-PLATFORMS: list[str] = []
+PLATFORMS: list[str] = ["switch"]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -23,7 +23,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     _LOGGER.debug(f"Button+ init got new device entry! {entry.entry_id.title}")
     device_configuration: DeviceConfiguration = DeviceConfiguration.from_json(entry.data.get("config"))
 
-    hub = ButtonPlusHub(hass, device_configuration)
+    hub = ButtonPlusHub(hass, device_configuration, entry)
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = hub
 
     # This creates each HA object for each platform your device requires.
