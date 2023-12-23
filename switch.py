@@ -1,26 +1,16 @@
 """ Platform for switch integration. """
 from __future__ import annotations
 
-import json
 import logging
 
-import homeassistant.helpers.config_validation as cv
-import voluptuous as vol
 from homeassistant.components.switch import (SwitchEntity, PLATFORM_SCHEMA, SwitchDeviceClass)
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import (
-    CONF_HOST
-)
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import UndefinedType
 from . import ButtonPlusHub
 
 from .const import DOMAIN
-
-PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
-    vol.Required(CONF_HOST): cv.string,
-})
 
 _LOGGER = logging.getLogger(__name__)
 
