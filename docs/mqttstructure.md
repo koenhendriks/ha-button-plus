@@ -30,8 +30,8 @@ Alignment | numeric: | sensor attribute
 8            | Bottom Right    
 
 ## Buttons
-Each button has a button, a display a front LED and a wall LED.
-Attribute | Topic | P/S | Home Assistant
---- | --- | --- | ---
-Click | | P | binary_sensor
-Release 
+Each button has a button, a display a front LED and a wall LED. The device will publish topics (P) and subscribe to topics (S).
+Attribute | Topic | P/S | value | Home Assistant
+--- | --- | --- | --- | ---
+Click | `buttonplus/<deviceID>/bars/<buttonID>/click` | P | true/false | binary_sensor
+
