@@ -11,10 +11,11 @@ import voluptuous as vol
 from homeassistant import config_entries, exceptions
 from homeassistant.const import CONF_IP_ADDRESS, CONF_EMAIL, CONF_PASSWORD
 from homeassistant.helpers import aiohttp_client
+from .button_plus_api.api_client import ApiClient
+from .button_plus_api.local_api_client import LocalApiClient
 
 from .const import DOMAIN  # pylint:disable=unused-import
-from .button_plus_api import ApiClient
-from .button_plus_api_local import ApiClient as LocalApiClient
+
 
 _LOGGER = logging.getLogger(__name__)
 
