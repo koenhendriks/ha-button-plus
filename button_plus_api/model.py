@@ -217,22 +217,18 @@ class DeviceConfiguration:
                     d['mqttbrokers'] = [serialize(broker) for broker in d.pop('mqtt_brokers')]
                     d['mqttsensors'] = [serialize(sensor) for sensor in d.pop('mqtt_sensors')]
 
-                # Custom mappings for Info class
                 if isinstance(obj, Info):
                     d['id'] = d.pop('device_id')
                     d['ipaddress'] = d.pop('ip_address')
                     d['largedisplay'] = d.pop('large_display')
 
-                # Custom mappings for Connector class
                 elif isinstance(obj, Connector):
                     d['id'] = d.pop('connector_id')
                     d['type'] = d.pop('connector_type')
 
-                # Custom mappings for Sensor class
                 elif isinstance(obj, Sensor):
                     d['sensorid'] = d.pop('sensor_id')
 
-                # Custom mappings for Core class
                 elif isinstance(obj, Core):
                     d['autobackup'] = d.pop('auto_backup')
                     d['brightnesslargedisplay'] = d.pop('brightness_large_display')
@@ -253,17 +249,14 @@ class DeviceConfiguration:
                     d['brokerid'] = d.pop('broker_id')
                     d['eventtype'] = d.pop('event_type')
 
-                    # Custom mappings for MqttDisplay class
                 elif isinstance(obj, MqttDisplay):
                     d['fontsize'] = d.pop('font_size')
                     d['topics'] = [serialize(topic) for topic in d['topics']]
 
-                    # Custom mappings for MqttBroker class
                 elif isinstance(obj, MqttBroker):
                     d['brokerid'] = d.pop('broker_id')
                     d['wsport'] = d.pop('ws_port')
 
-                    # Custom mappings for MqttSensor class
                 elif isinstance(obj, MqttSensor):
                     d['sensorid'] = d.pop('sensor_id')
                     d['topic'] = serialize(d['topic'])

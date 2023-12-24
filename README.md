@@ -8,4 +8,4 @@ Currently this project is in development and **highly** unstable.
 
 ## Documentation
 
-[Documentation](docs%2FReadme.md) can be found within this repo in the `docs/` directory.
+[Documentation](https://github.com/koenhendriks/ha-button-plus/wiki) can be found in the [wiki](https://github.com/koenhendriks/ha-button-plus/wiki) of this repo.
