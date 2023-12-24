@@ -1,5 +1,7 @@
 # MQTT topic structure
 
+This page contains the MQTT reference topics for communication between ha-button-plus and the actual Button+ device.
+
 ## Main display
 The Button+ main display can have several display items, listening to MQTT topics for its configuration. Currently, Button+ only listens to the value topic. Each of these attributes have individual MQTT broker setting.
 
