@@ -1,5 +1,6 @@
 # MQTT topic structure
 
+x
 This page contains the MQTT reference topics for communication between ha-button-plus and the actual Button+ device.
 
 ## Main display
@@ -37,18 +38,18 @@ Naming convention for the display item sensors:
 
 ## Buttons
 Each button has a button, a display a front LED and a wall LED. The device will publish topics (P) and subscribe to topics (S).
-Attribute | Topic | P/S | value | Home Assistant
---- | --- | --- | --- | ---
-click | `buttonplus/<deviceID>/bars/<buttonID>/click` | P | true/false | binary_sensor
-longclick | `buttonplus/<deviceID>/bars/<buttonID>/longclick` | P | true/false | attribute
-label | `buttonplus/<deviceID>/bars/<buttonID>/label` | S | text | attribute
-toplabel | `buttonplus/<deviceID>/bars/<buttonID>/toplabel` | S | text | attribute
-unit | `buttonplus/<deviceID>/bars/<buttonID>/uom` | S | text | attribute
-label | `buttonplus/<deviceID>/bars/<buttonID>/label` | S | text | attribute
-led_front | `buttonplus/<deviceID>/bars/<buttonID>/led_front` | S | true/false | attribute
-ledcolorfront | `buttonplus/<deviceID>/bars/<buttonID>/ledcolorfront` | S | decimal color (for instance 15140872) | attribute
-led_wall | `buttonplus/<deviceID>/bars/<buttonID>/led_wall` | S | true/false | attribute
-ledcolorwall | `buttonplus/<deviceID>/bars/<buttonID>/ledcolorwall` | S | decimal color (for instance 15140872) | attribute
+Attribute | Topic | P/S | value | Home Assistant | Implemented?
+--- | --- | --- | --- | --- | ---
+click | `buttonplus/<deviceID>/bars/<buttonID>/click` | P | true/false | binary_sensor | n
+longclick | `buttonplus/<deviceID>/bars/<buttonID>/longclick` | P | true/false | attribute | n
+label | `buttonplus/<deviceID>/bars/<buttonID>/label` | S | text | attribute | n
+toplabel | `buttonplus/<deviceID>/bars/<buttonID>/toplabel` | S | text | attribute | n
+unit | `buttonplus/<deviceID>/bars/<buttonID>/uom` | S | text | attribute | n
+label | `buttonplus/<deviceID>/bars/<buttonID>/label` | S | text | attribute | n
+led_front | `buttonplus/<deviceID>/bars/<buttonID>/led_front` | S | true/false | attribute | n
+ledcolorfront | `buttonplus/<deviceID>/bars/<buttonID>/ledcolorfront` | S | decimal color (for instance 15140872) | attribute | n
+led_wall | `buttonplus/<deviceID>/bars/<buttonID>/led_wall` | S | true/false | attribute | n
+ledcolorwall | `buttonplus/<deviceID>/bars/<buttonID>/ledcolorwall` | S | decimal color (for instance 15140872) | attribute | n
 
 ### Naming convention
 Naming convention for the button binary_sensors:
