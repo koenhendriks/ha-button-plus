@@ -4,7 +4,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from homeassistant.components.light import LightEntity, ColorMode
+from homeassistant.components.light import LightEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -28,23 +28,22 @@ async def async_setup_entry(
     buttons = hub.config.mqtt_buttons
 
     for button in buttons:
-        lights.append(ButtonPlusLight(button.button_id, button.label, hub.hub_id))
+        _LOGGER.debug(f"Creating Lights with parameters: {button.button_id} {button.label} {hub.hub_id}")
+        lights.append(ButtonPlusWallLight(button.button_id, hub.hub_id))
+        lights.append(ButtonPlusFrontLight(button.button_id, hub.hub_id))
 
     async_add_entities(lights)
 
 
 class ButtonPlusLight(LightEntity):
-    def __init__(self, btn_id, btn_label, hub_id):
-        self._attr_unique_id = f'light-{hub_id}-{btn_id}'
+    def __init__(self, btn_id: int, hub_id: str, light_type: str):
+        self._btn_id = btn_id
         self._hub_id = hub_id
-        self._attr_name = f'light-{btn_id}'
-        self._name = btn_label
+        self._light_type = light_type
+        self._attr_unique_id = f'light-{light_type}-{hub_id}-{btn_id}'
+        self.entity_id = f"light.{light_type}_{hub_id}_{btn_id}"
+        self._attr_name = f'light-{light_type}-{btn_id}'
         self._state = False
-
-    @property
-    def name(self) -> str:
-        """Return the display name of this light."""
-        return self._name
 
     @property
     def is_on(self) -> bool | None:
@@ -55,20 +54,44 @@ class ButtonPlusLight(LightEntity):
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Instruct the light to turn on. """
         # Need to apply mqtt logic here to turn on led
-        _LOGGER.debug(f"Turn on {self._name} (attr_name: {self._attr_name}) (unique: {self._attr_unique_id})")
+        _LOGGER.debug(f"Turn on {self.name} (attr_name: {self._attr_name}) (unique: {self._attr_unique_id})")
 
     async def async_turn_off(self, **kwargs: Any) -> None:
         """Instruct the light to turn off."""
         # Need to apply mqtt logic here to turn off led
-        _LOGGER.debug(f"Turn off {self._name} (attr_name: {self._attr_name}) (unique: {self._attr_unique_id})")
+        _LOGGER.debug(f"Turn off {self.name} (attr_name: {self._attr_name}) (unique: {self._attr_unique_id})")
 
     def update(self) -> None:
         """Fetch new state data for this light."""
         # get latest stats from mqtt for this light
         # then update self._state
-        _LOGGER.debug(f"Update {self._name} (attr_name: {self._attr_name}) (unique: {self._attr_unique_id})")
+        _LOGGER.debug(f"Update {self.name} (attr_name: {self._attr_name}) (unique: {self._attr_unique_id})")
 
     @property
     def device_info(self):
         """Return information to link this entity with the correct device."""
         return {"identifiers": {(DOMAIN, self._hub_id)}}
+
+
+class ButtonPlusWallLight(ButtonPlusLight):
+    """ Wall light entity representation """
+
+    def __init__(self, btn_id: int, hub_id: str):
+        super().__init__(btn_id, hub_id, "wall")
+
+    @property
+    def name(self) -> str:
+        """Return the display name of this light."""
+        return f'LED Wall {self._btn_id}'
+
+
+class ButtonPlusFrontLight(ButtonPlusLight):
+    """ Wall light entity representation """
+
+    def __init__(self, btn_id: int, hub_id: str):
+        super().__init__(btn_id, hub_id, "front")
+
+    @property
+    def name(self) -> str:
+        """Return the display name of this light."""
+        return f'LED Front {self._btn_id}'

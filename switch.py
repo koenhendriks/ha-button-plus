@@ -27,26 +27,25 @@ async def async_setup_entry(
     buttons = hub.config.mqtt_buttons
 
     for button in buttons:
-        switches.append(ButtonPlusSwitch(button.button_id, button.label, hub.hub_id))
+        _LOGGER.debug(f"Creating switch with parameters: {button.button_id} {button.label} {hub.hub_id}")
+        switches.append(ButtonPlusSwitch(button.button_id, hub.hub_id))
 
     async_add_entities(switches)
 
 
 class ButtonPlusSwitch(SwitchEntity):
-    """ Representation of a button+ switch """
-    _attr_has_entity_name = True
-
-    def __init__(self, btn_id, btn_label, hub_id):
+    def __init__(self, btn_id, hub_id):
         self._is_on = False
         self._attr_unique_id = f'switch-{hub_id}-{btn_id}'
         self._hub_id = hub_id
+        self.entity_id = f"switch.{hub_id}_{btn_id}"
         self._attr_name = f'switch-{btn_id}'
-        self._name = btn_label
+        self._name = f'Button {btn_id}'
         self._device_class = SwitchDeviceClass.SWITCH
 
     @property
     def name(self) -> str:
-        """Return the display name of this light."""
+        """Return the display name of this switch."""
         return self._name
 
     @property
