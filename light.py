@@ -10,7 +10,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from . import ButtonPlusHub
 
-from .const import DOMAIN
+from .const import DOMAIN, MANUFACTURER
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -29,19 +29,20 @@ async def async_setup_entry(
 
     for button in buttons:
         _LOGGER.debug(f"Creating Lights with parameters: {button.button_id} {button.label} {hub.hub_id}")
-        lights.append(ButtonPlusWallLight(button.button_id, hub.hub_id))
-        lights.append(ButtonPlusFrontLight(button.button_id, hub.hub_id))
+        lights.append(ButtonPlusWallLight(button.button_id, hub))
+        lights.append(ButtonPlusFrontLight(button.button_id, hub))
 
     async_add_entities(lights)
 
 
 class ButtonPlusLight(LightEntity):
-    def __init__(self, btn_id: int, hub_id: str, light_type: str):
+    def __init__(self, btn_id: int, hub: ButtonPlusHub, light_type: str):
         self._btn_id = btn_id
-        self._hub_id = hub_id
+        self._hub = hub
+        self._hub_id = hub.hub_id
         self._light_type = light_type
-        self._attr_unique_id = f'light-{light_type}-{hub_id}-{btn_id}'
-        self.entity_id = f"light.{light_type}_{hub_id}_{btn_id}"
+        self._attr_unique_id = f'light-{light_type}-{self._hub_id}-{btn_id}'
+        self.entity_id = f"light.{light_type}_{self._hub_id}_{btn_id}"
         self._attr_name = f'light-{light_type}-{btn_id}'
         self._state = False
 
@@ -70,14 +71,40 @@ class ButtonPlusLight(LightEntity):
     @property
     def device_info(self):
         """Return information to link this entity with the correct device."""
-        return {"identifiers": {(DOMAIN, self._hub_id)}}
+        device_info = {
+            "via_device": (DOMAIN, self._hub.hub_id),
+            "manufacturer": MANUFACTURER,
+        }
+
+        match self._btn_id:
+            case 0 | 1:
+                return {"identifiers": {(DOMAIN, self._hub_id)}}
+
+            case 2 | 3:
+                device_info["name"] = f"BAR Module 1"
+                device_info["connections"] = {("bar_module", 1)}
+                device_info["model"] = "BAR Module"
+                device_info["identifiers"] = {(DOMAIN, f'{self._btn_id}_bar_module_1')}
+
+            case 4 | 5:
+                device_info["name"] = f"BAR Module 2"
+                device_info["connections"] = {("bar_module", 2)}
+                device_info["model"] = "BAR Module"
+                device_info["identifiers"] = {(DOMAIN, f'{self._btn_id}_bar_module_2')}
+            case 6 | 7:
+                device_info["name"] = f"BAR Module 3"
+                device_info["connections"] = {("bar_module", 3)}
+                device_info["model"] = "BAR Module"
+                device_info["identifiers"] = {(DOMAIN, f'{self._btn_id}_bar_module_3')}
+
+        return device_info
 
 
 class ButtonPlusWallLight(ButtonPlusLight):
     """ Wall light entity representation """
 
-    def __init__(self, btn_id: int, hub_id: str):
-        super().__init__(btn_id, hub_id, "wall")
+    def __init__(self, btn_id: int, hub: ButtonPlusHub):
+        super().__init__(btn_id, hub, "wall")
 
     @property
     def name(self) -> str:
@@ -88,8 +115,8 @@ class ButtonPlusWallLight(ButtonPlusLight):
 class ButtonPlusFrontLight(ButtonPlusLight):
     """ Wall light entity representation """
 
-    def __init__(self, btn_id: int, hub_id: str):
-        super().__init__(btn_id, hub_id, "front")
+    def __init__(self, btn_id: int, hub: ButtonPlusHub):
+        super().__init__(btn_id, hub, "front")
 
     @property
     def name(self) -> str:

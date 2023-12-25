@@ -8,9 +8,10 @@ from homeassistant.components.text import TextEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+
 from . import ButtonPlusHub
 
-from .const import DOMAIN
+from .const import DOMAIN, MANUFACTURER
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -29,19 +30,20 @@ async def async_setup_entry(
 
     for button in buttons:
         _LOGGER.debug(f"Creating Texts with parameters: {button.button_id} {button.top_label} {button.label} {hub.hub_id}")
-        texts.append(ButtonPlusLabel(button.button_id, hub.hub_id, button.label))
-        texts.append(ButtonPlusTopLabel(button.button_id, hub.hub_id, button.top_label))
+        texts.append(ButtonPlusLabel(button.button_id, hub, button.label))
+        texts.append(ButtonPlusTopLabel(button.button_id, hub, button.top_label))
 
     async_add_entities(texts)
 
 
 class ButtonPlusText(TextEntity):
-    def __init__(self, btn_id: int, hub_id: str, btn_label: str, text_type: str):
+    def __init__(self, btn_id: int, hub: ButtonPlusHub, btn_label: str, text_type: str):
         self._btn_id = btn_id
-        self._hub_id = hub_id
+        self._hub = hub
+        self._hub_id = hub.hub_id
         self._text_type = text_type
-        self._attr_unique_id = f'text-{text_type}-{hub_id}-{btn_id}'
-        self.entity_id = f"text.{text_type}_{hub_id}_{btn_id}"
+        self._attr_unique_id = f'text-{text_type}-{self._hub_id}-{btn_id}'
+        self.entity_id = f"text.{text_type}_{self._hub_id}_{btn_id}"
         self._attr_name = f'text-{text_type}-{btn_id}'
         self._attr_native_value = btn_label
 
@@ -54,7 +56,33 @@ class ButtonPlusText(TextEntity):
     @property
     def device_info(self):
         """Return information to link this entity with the correct device."""
-        return {"identifiers": {(DOMAIN, self._hub_id)}}
+        device_info = {
+            "via_device": (DOMAIN, self._hub.hub_id),
+            "manufacturer": MANUFACTURER,
+        }
+
+        match self._btn_id:
+            case 0 | 1:
+                return {"identifiers": {(DOMAIN, self._hub_id)}}
+
+            case 2 | 3:
+                device_info["name"] = f"BAR Module 1"
+                device_info["connections"] = {("bar_module", 1)}
+                device_info["model"] = "BAR Module"
+                device_info["identifiers"] = {(DOMAIN, f'{self._btn_id}_bar_module_1')}
+
+            case 4 | 5:
+                device_info["name"] = f"BAR Module 2"
+                device_info["connections"] = {("bar_module", 2)}
+                device_info["model"] = "BAR Module"
+                device_info["identifiers"] = {(DOMAIN, f'{self._btn_id}_bar_module_2')}
+            case 6 | 7:
+                device_info["name"] = f"BAR Module 3"
+                device_info["connections"] = {("bar_module", 3)}
+                device_info["model"] = "BAR Module"
+                device_info["identifiers"] = {(DOMAIN, f'{self._btn_id}_bar_module_3')}
+
+        return device_info
 
     def set_value(self, value: str) -> None:
         """Set the text value."""
@@ -68,8 +96,8 @@ class ButtonPlusText(TextEntity):
 class ButtonPlusLabel(ButtonPlusText):
     """ Wall label entity representation """
 
-    def __init__(self, btn_id: int, hub_id: str, label: str):
-        super().__init__(btn_id, hub_id, label, "label")
+    def __init__(self, btn_id: int, hub: ButtonPlusHub, label: str):
+        super().__init__(btn_id, hub, label, "label")
 
     @property
     def name(self) -> str:
@@ -80,8 +108,8 @@ class ButtonPlusLabel(ButtonPlusText):
 class ButtonPlusTopLabel(ButtonPlusText):
     """ Wall label entity representation """
 
-    def __init__(self, btn_id: int, hub_id: str, label: str):
-        super().__init__(btn_id, hub_id, label, "top_label")
+    def __init__(self, btn_id: int, hub: ButtonPlusHub, label: str):
+        super().__init__(btn_id, hub, label, "top_label")
 
     @property
     def name(self) -> str:
