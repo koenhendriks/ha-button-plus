@@ -53,11 +53,10 @@ class Info:
 
 
 class Core:
-    def __init__(self, name: str, location: str, invert: bool, auto_backup: bool, brightness_large_display: int,
+    def __init__(self, name: str, location: str, auto_backup: bool, brightness_large_display: int,
                  brightness_mini_display: int, led_color_front: int, led_color_wall: int, color: int):
         self.name = name
         self.location = location
-        self.invert = invert
         self.auto_backup = auto_backup
         self.brightness_large_display = brightness_large_display
         self.brightness_mini_display = brightness_mini_display
@@ -70,7 +69,6 @@ class Core:
         return Core(
             name=data['name'],
             location=data['location'],
-            invert=data['invert'],
             auto_backup=data['autobackup'],
             brightness_large_display=data['brightnesslargedisplay'],
             brightness_mini_display=data['brightnessminidisplay'],
@@ -152,11 +150,13 @@ class MqttDisplay:
 
 
 class MqttBroker:
-    def __init__(self, broker_id: str, url: str, port: int, ws_port: int):
+    def __init__(self, broker_id: str, url: str, port: int, ws_port: int, username: str, password: str):
         self.broker_id = broker_id
         self.url = url
         self.port = port
         self.ws_port = ws_port
+        self.username = username
+        self.password = password
 
     @staticmethod
     def from_dict(data: Dict[str, Any]) -> 'MqttBroker':
@@ -164,7 +164,9 @@ class MqttBroker:
             broker_id=data['brokerid'],
             url=data['url'],
             port=data['port'],
-            ws_port=data['wsport']
+            ws_port=data['wsport'],
+            username=data['username'],
+            password=data['password']
         )
 
 
