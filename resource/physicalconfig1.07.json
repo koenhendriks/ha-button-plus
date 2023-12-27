@@ -1,0 +1,200 @@
+{
+    "info": {
+        "id": "btn_4967c8",
+        "mac": "F4:12:FA:49:67:C8",
+        "ipaddress": "192.168.2.17",
+        "firmware": "1.07",
+        "largedisplay": 0,
+        "connectors": [
+            {
+                "id": 0,
+                "type": 2
+            },
+            {
+                "id": 1,
+                "type": 1
+            },
+            {
+                "id": 2,
+                "type": 1
+            },
+            {
+                "id": 3,
+                "type": 1
+            }
+        ],
+        "sensors": [
+            {
+                "sensorid": 1,
+                "description": "Sensirion STS35 Temperature Sensor"
+            }
+        ]
+    },
+    "core": {
+        "name": "btn_4967c8",
+        "location": "Room 1",
+        "autobackup": true,
+        "brightnesslargedisplay": 100,
+        "brightnessminidisplay": 100,
+        "ledcolorfront": 0,
+        "ledcolorwall": 0,
+        "color": 0
+    },
+    "mqttbuttons": [
+        {
+            "id": 0,
+            "label": "Btn 0",
+            "toplabel": "Label",
+            "ledcolorfront": 0,
+            "ledcolorwall": 0,
+            "longdelay": 75,
+            "longrepeat": 15,
+            "topics": []
+        },
+        {
+            "id": 1,
+            "label": "Btn 1",
+            "toplabel": "Label",
+            "ledcolorfront": 0,
+            "ledcolorwall": 0,
+            "longdelay": 75,
+            "longrepeat": 15,
+            "topics": []
+        },
+        {
+            "id": 2,
+            "label": "Btn 2",
+            "toplabel": "Label",
+            "ledcolorfront": 0,
+            "ledcolorwall": 0,
+            "longdelay": 75,
+            "longrepeat": 15,
+            "topics": [
+                {
+                    "brokerid": "hassdev",
+                    "topic": "buttonplus/btn_4967c8/bars/2/click",
+                    "payload": "true",
+                    "eventtype": 0
+                }
+            ]
+        },
+        {
+            "id": 3,
+            "label": "Btn 3",
+            "toplabel": "Label",
+            "ledcolorfront": 0,
+            "ledcolorwall": 0,
+            "longdelay": 75,
+            "longrepeat": 15,
+            "topics": []
+        },
+        {
+            "id": 4,
+            "label": "Btn 4",
+            "toplabel": "Label",
+            "ledcolorfront": 0,
+            "ledcolorwall": 0,
+            "longdelay": 75,
+            "longrepeat": 15,
+            "topics": []
+        },
+        {
+            "id": 5,
+            "label": "Btn 5",
+            "toplabel": "Label",
+            "ledcolorfront": 0,
+            "ledcolorwall": 0,
+            "longdelay": 75,
+            "longrepeat": 15,
+            "topics": []
+        },
+        {
+            "id": 6,
+            "label": "Btn 6",
+            "toplabel": "Label",
+            "ledcolorfront": 0,
+            "ledcolorwall": 0,
+            "longdelay": 75,
+            "longrepeat": 15,
+            "topics": []
+        },
+        {
+            "id": 7,
+            "label": "Btn 7",
+            "toplabel": "Label",
+            "ledcolorfront": 0,
+            "ledcolorwall": 0,
+            "longdelay": 75,
+            "longrepeat": 15,
+            "topics": []
+        }
+    ],
+    "mqttdisplays": [
+        {
+            "x": 0,
+            "y": 0,
+            "fontsize": 4,
+            "align": 0,
+            "width": 50,
+            "round": 0,
+            "label": "Amsterdam",
+            "unit": "",
+            "topics": [
+                {
+                    "brokerid": "buttonplus",
+                    "topic": "system/datetime/amsterdam",
+                    "payload": "",
+                    "eventtype": 15
+                }
+            ]
+        },
+        {
+            "x": 0,
+            "y": 40,
+            "fontsize": 2,
+            "align": 0,
+            "width": 30,
+            "round": 1,
+            "label": "",
+            "unit": "°C",
+            "topics": [
+                {
+                    "brokerid": "buttonplus",
+                    "topic": "button/btn_4967c8/temperature",
+                    "payload": "",
+                    "eventtype": 15
+                }
+            ]
+        }
+    ],
+    "mqttbrokers": [
+        {
+            "brokerid": "buttonplus",
+            "url": "mqtt://mqtt.button.plus",
+            "port": 0,
+            "wsport": 0,
+            "username": "",
+            "password": ""
+        },
+        {
+            "brokerid": "hassdev",
+            "url": "mqtt://192.168.2.16/",
+            "port": 1883,
+            "wsport": 9001,
+            "username": "koen",
+            "password": "koen"
+        }
+    ],
+    "mqttsensors": [
+        {
+            "sensorid": 1,
+            "interval": 10,
+            "topic": {
+                "brokerid": "buttonplus",
+                "topic": "button/btn_4967c8/temperature",
+                "payload": "",
+                "eventtype": 18
+            }
+        }
+    ]
+}
