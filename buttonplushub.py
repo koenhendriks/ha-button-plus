@@ -31,7 +31,7 @@ class ButtonPlusHub:
         device_registry = dr.async_get(hass)
 
         device_registry.async_get_or_create(
-            configuration_url=f"http://"{self.config.info.ip_address}/",
+            configuration_url=f"http://{self.config.info.ip_address}/",
             config_entry_id=entry.entry_id,
             connections={(dr.CONNECTION_NETWORK_MAC, self.config.info.mac)},
             identifiers={(DOMAIN, self.config.info.device_id)},
