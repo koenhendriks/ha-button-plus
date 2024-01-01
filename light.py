@@ -28,7 +28,7 @@ async def async_setup_entry(
     buttons = hub.config.mqtt_buttons
 
     for button in buttons:
-        _LOGGER.debug(f"Creating Lights with parameters: {button.button_id} {button.label} {hub.hub_id}")
+        # _LOGGER.debug(f"Creating Lights with parameters: {button.button_id} {button.label} {hub.hub_id}")
         lights.append(ButtonPlusWallLight(button.button_id, hub))
         lights.append(ButtonPlusFrontLight(button.button_id, hub))
 

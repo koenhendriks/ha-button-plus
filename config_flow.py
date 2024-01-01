@@ -13,25 +13,49 @@ from homeassistant.const import CONF_IP_ADDRESS, CONF_EMAIL, CONF_PASSWORD
 from homeassistant.helpers import aiohttp_client
 from .button_plus_api.api_client import ApiClient
 from .button_plus_api.local_api_client import LocalApiClient
-from .button_plus_api.model import DeviceConfiguration
+from .button_plus_api.model import DeviceConfiguration, MqttBroker
+from homeassistant.helpers.network import get_url
 
 from .const import DOMAIN  # pylint:disable=unused-import
-
 
 _LOGGER = logging.getLogger(__name__)
 
 
-class ConfigFlow(config_entries.ConfigFlow,                 domain=DOMAIN):
+class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Button+."""
+
+    def __init__(self):
+        self.mqtt_entry = None
 
     VERSION = 1
     CONNECTION_CLASS = config_entries.CONN_CLASS_LOCAL_PUSH
 
     async def async_step_user(self, user_input=None):
-        """Handle the initial Button+ setup, showing the 2 options."""
+        """Handle the initial Button+ setup, showing the 2 options and checking the MQTT integration."""
+        mqtt_entries = self.hass.config_entries.async_entries(domain="mqtt")
+
+        if len(mqtt_entries) < 1:
+            mqtt_url = f'{get_url(self.hass)}/config/integrations/integration/mqtt'
+
+            return self.async_abort(
+                reason="mqtt_not_enabled",
+                description_placeholders={
+                    "mqtt_integration_link": mqtt_url
+                })
+        mqtt_entry = mqtt_entries[0]
+        broker = mqtt_entry.data.get("broker")
+        broker_port = mqtt_entry.data.get("port")
+        broker_username = mqtt_entry.data.get("username", "(No authentication)")
+        self.mqtt_entry = mqtt_entry
+
         return self.async_show_menu(
             step_id="user",
             menu_options=["fetch_website", "manual"],
+            description_placeholders={
+                "mqtt_broker": broker,
+                "mqtt_broker_port": broker_port,
+                "mqtt_user": broker_username
+            }
         )
 
     async def async_step_manual(self, user_input=None):
@@ -48,6 +72,11 @@ class ConfigFlow(config_entries.ConfigFlow,                 domain=DOMAIN):
                     json_config = await api_client.fetch_config()
                     device_config: DeviceConfiguration = DeviceConfiguration.from_json(json_config)
 
+                    self.add_broker_to_config(device_config)
+                    self.add_topics_to_buttons(device_config)
+
+                    await api_client.push_config(device_config)
+
                     return self.async_create_entry(
                         title=f"{device_config.core.name}",
                         description=f"Base module on {ip} with id {device_config.info.device_id}",
@@ -56,12 +85,12 @@ class ConfigFlow(config_entries.ConfigFlow,                 domain=DOMAIN):
 
                 except JSONDecodeError as ex:  # pylint: disable=broad-except
                     _LOGGER.error(
-                        f"{DOMAIN}  Could not parse json from IP {ip} : %s - traceback: %s",
+                        f"{DOMAIN} Could not parse json from IP {ip} : %s - traceback: %s",
                         ex,
                         traceback.format_exc()
                     )
 
-                    errors["base"] = "Error connecting or reading from {ip}"
+                    errors["base"] = f"Error connecting or reading from {ip}"
                 except Exception as ex:  # pylint: disable=broad-except
                     _LOGGER.error(
                         f"{DOMAIN} Exception in login : %s - traceback: %s",
@@ -117,7 +146,7 @@ class ConfigFlow(config_entries.ConfigFlow,                 domain=DOMAIN):
                         device_id = device_config.get('info').get('id')
                         last_entry = self.async_create_entry(
                             title=f"{device_name}",
-                            description=f"Base module on {device_ip} with local id {device_id} adn website id {device_website_id}",
+                            description=f"Base module on {device_ip} with local id {device_id} and website id {device_website_id}",
                             data=device_config
                         )
 
@@ -166,3 +195,35 @@ class ConfigFlow(config_entries.ConfigFlow,                 domain=DOMAIN):
             return True
         except ValueError:
             return False
+
+    def add_broker_to_config(self, device_config: DeviceConfiguration) -> DeviceConfiguration:
+        mqtt_entry = self.mqtt_entry
+        broker_endpoint = mqtt_entry.data.get("broker")
+        broker_port = mqtt_entry.data.get("port")
+        broker_username = mqtt_entry.data.get("username", "")
+        broker_password = mqtt_entry.data.get("password", "")
+
+        broker = MqttBroker(
+            broker_id=f"ha-button-plus",
+            url=f"mqtt://{broker_endpoint}/",
+            port=broker_port,
+            ws_port=9001,
+            username=broker_username,
+            password=broker_password
+        )
+
+        device_config.mqtt_brokers.append(broker)
+        return device_config
+
+    def add_topics_to_buttons(self, device_config) -> DeviceConfiguration:
+        device_id = device_config.info.device_id
+
+        for button in device_config.mqtt_buttons:
+            button.topics.append({
+                "brokerid": "ha-button-plus",
+                "topic": f"buttonplus/{device_id}/button/{button.button_id}/click",
+                "payload": "press",
+                "eventtype": 0
+            })
+
+        return device_config

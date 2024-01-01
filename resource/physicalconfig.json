@@ -2,8 +2,8 @@
     "info": {
         "id": "btn_4967c8",
         "mac": "F4:12:FA:49:67:C8",
-        "ipaddress": "192.168.2.17",
-        "firmware": "1.03",
+        "ipaddress": "192.168.2.18",
+        "firmware": "1.07",
         "largedisplay": 0,
         "connectors": [
             {
@@ -31,79 +31,101 @@
         ]
     },
     "core": {
-        "name": "DevButtonPluss",
-        "location": "Livingroom",
-        "invert": false,
+        "name": "btn_4967c8",
+        "location": "Room 1",
         "autobackup": true,
-        "brightnesslargedisplay": 100,
-        "brightnessminidisplay": 100,
+        "brightnesslargedisplay": 60,
+        "brightnessminidisplay": 50,
         "ledcolorfront": 0,
         "ledcolorwall": 0,
-        "color": 6579300
+        "color": 0
     },
     "mqttbuttons": [
         {
             "id": 0,
-            "label": "display left",
-            "toplabel": "display label left",
+            "label": "Btn 0",
+            "toplabel": "Label",
             "ledcolorfront": 0,
             "ledcolorwall": 0,
+            "longdelay": 75,
+            "longrepeat": 15,
             "topics": []
         },
         {
             "id": 1,
-            "label": "display right",
-            "toplabel": "display label right",
+            "label": "Btn 1",
+            "toplabel": "Label",
             "ledcolorfront": 0,
             "ledcolorwall": 0,
+            "longdelay": 75,
+            "longrepeat": 15,
             "topics": []
         },
         {
             "id": 2,
-            "label": "Btn 1 left",
-            "toplabel": "Label 1 left",
-            "ledcolorfront": 16711680,
-            "ledcolorwall": 2818303,
-            "topics": []
+            "label": "Btn 2",
+            "toplabel": "Label",
+            "ledcolorfront": 0,
+            "ledcolorwall": 0,
+            "longdelay": 75,
+            "longrepeat": 15,
+            "topics": [
+                {
+                    "brokerid": "ha-button-plus",
+                    "topic": "button_plus/btn_4967c8/button/2/click",
+                    "payload": "press",
+                    "eventtype": 0
+                }
+            ]
         },
         {
             "id": 3,
-            "label": "Btn 1 right",
-            "toplabel": "Label 1 right",
+            "label": "Btn 3",
+            "toplabel": "Label",
             "ledcolorfront": 0,
             "ledcolorwall": 0,
+            "longdelay": 75,
+            "longrepeat": 15,
             "topics": []
         },
         {
             "id": 4,
-            "label": "Btn 2 left",
-            "toplabel": "Label 2 left",
+            "label": "Btn 4",
+            "toplabel": "Label",
             "ledcolorfront": 0,
             "ledcolorwall": 0,
+            "longdelay": 75,
+            "longrepeat": 15,
             "topics": []
         },
         {
             "id": 5,
-            "label": "Btn 2 right",
-            "toplabel": "Label 2 right",
+            "label": "Btn 5",
+            "toplabel": "Label",
             "ledcolorfront": 0,
             "ledcolorwall": 0,
+            "longdelay": 75,
+            "longrepeat": 15,
             "topics": []
         },
         {
             "id": 6,
-            "label": "Btn 3 left",
-            "toplabel": "Label 3 left",
+            "label": "Btn 6",
+            "toplabel": "Label",
             "ledcolorfront": 0,
             "ledcolorwall": 0,
+            "longdelay": 75,
+            "longrepeat": 15,
             "topics": []
         },
         {
             "id": 7,
-            "label": "Btn 3 right",
-            "toplabel": "Label 3 right",
+            "label": "Btn 7",
+            "toplabel": "Label",
             "ledcolorfront": 0,
             "ledcolorwall": 0,
+            "longdelay": 75,
+            "longrepeat": 15,
             "topics": []
         }
     ],
@@ -114,9 +136,9 @@
             "fontsize": 4,
             "align": 0,
             "width": 50,
-            "label": "Time",
-            "unit": "",
             "round": 0,
+            "label": "Amsterdam",
+            "unit": "",
             "topics": [
                 {
                     "brokerid": "buttonplus",
@@ -132,8 +154,9 @@
             "fontsize": 2,
             "align": 0,
             "width": 30,
-            "unit": "°C",
             "round": 1,
+            "label": "",
+            "unit": "°C",
             "topics": [
                 {
                     "brokerid": "buttonplus",
@@ -149,19 +172,29 @@
             "brokerid": "buttonplus",
             "url": "mqtt://mqtt.button.plus",
             "port": 0,
-            "wsport": 0
+            "wsport": 0,
+            "username": "",
+            "password": ""
+        },
+        {
+            "brokerid": "ha-button-plus",
+            "url": "mqtt://192.168.2.5/",
+            "port": 1883,
+            "wsport": 9001,
+            "username": "koen",
+            "password": "koen"
         }
     ],
     "mqttsensors": [
         {
             "sensorid": 1,
+            "interval": 10,
             "topic": {
                 "brokerid": "buttonplus",
                 "topic": "button/btn_4967c8/temperature",
                 "payload": "",
                 "eventtype": 18
-            },
-            "interval": 10
+            }
         }
     ]
 }

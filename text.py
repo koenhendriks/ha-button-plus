@@ -29,7 +29,7 @@ async def async_setup_entry(
     buttons = hub.config.mqtt_buttons
 
     for button in buttons:
-        _LOGGER.debug(f"Creating Texts with parameters: {button.button_id} {button.top_label} {button.label} {hub.hub_id}")
+        # _LOGGER.debug(f"Creating Texts with parameters: {button.button_id} {button.top_label} {button.label} {hub.hub_id}")
         texts.append(ButtonPlusLabel(button.button_id, hub, button.label))
         texts.append(ButtonPlusTopLabel(button.button_id, hub, button.top_label))
 

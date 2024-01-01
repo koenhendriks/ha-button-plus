@@ -4,3 +4,4 @@
 # name for the integration.
 DOMAIN = "button_plus"
 MANUFACTURER = "Button+"
+SUPPORT_URL = "https://github.com/koenhendriks/ha-button-plus"

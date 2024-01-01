@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import logging
-from typing import Callable
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers import device_registry as dr
@@ -27,6 +26,7 @@ class ButtonPlusHub:
         self._id = self.config.info.device_id
         self._client = LocalApiClient(config.info.ip_address, aiohttp_client.async_get_clientsession(hass))
         self.online = True
+        self.button_entities = {}
 
         device_registry = dr.async_get(hass)
 
@@ -50,3 +50,6 @@ class ButtonPlusHub:
     @property
     def hub_id(self) -> str:
         return self._id
+
+    def add_button(self, button_id, entity):
+        self.button_entities[str(button_id)] = entity
