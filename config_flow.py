@@ -13,7 +13,7 @@ from homeassistant.const import CONF_IP_ADDRESS, CONF_EMAIL, CONF_PASSWORD
 from homeassistant.helpers import aiohttp_client
 from .button_plus_api.api_client import ApiClient
 from .button_plus_api.local_api_client import LocalApiClient
-from .button_plus_api.model import DeviceConfiguration
+from .button_plus_api.model import DeviceConfiguration, MqttBroker
 from homeassistant.helpers.network import get_url
 
 from .const import DOMAIN  # pylint:disable=unused-import
@@ -72,6 +72,11 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     json_config = await api_client.fetch_config()
                     device_config: DeviceConfiguration = DeviceConfiguration.from_json(json_config)
 
+                    self.add_broker_to_config(device_config)
+                    self.add_topics_to_buttons(device_config)
+
+                    await api_client.push_config(device_config)
+
                     return self.async_create_entry(
                         title=f"{device_config.core.name}",
                         description=f"Base module on {ip} with id {device_config.info.device_id}",
@@ -80,7 +85,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
                 except JSONDecodeError as ex:  # pylint: disable=broad-except
                     _LOGGER.error(
-                        f"{DOMAIN}  Could not parse json from IP {ip} : %s - traceback: %s",
+                        f"{DOMAIN} Could not parse json from IP {ip} : %s - traceback: %s",
                         ex,
                         traceback.format_exc()
                     )
@@ -190,3 +195,35 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             return True
         except ValueError:
             return False
+
+    def add_broker_to_config(self, device_config: DeviceConfiguration) -> DeviceConfiguration:
+        mqtt_entry = self.mqtt_entry
+        broker_endpoint = mqtt_entry.data.get("broker")
+        broker_port = mqtt_entry.data.get("port")
+        broker_username = mqtt_entry.data.get("username", "")
+        broker_password = mqtt_entry.data.get("password", "")
+
+        broker = MqttBroker(
+            broker_id=f"ha-button-plus",
+            url=f"mqtt://{broker_endpoint}/",
+            port=broker_port,
+            ws_port=9001,
+            username=broker_username,
+            password=broker_password
+        )
+
+        device_config.mqtt_brokers.append(broker)
+        return device_config
+
+    def add_topics_to_buttons(self, device_config) -> DeviceConfiguration:
+        device_id = device_config.info.device_id
+
+        for button in device_config.mqtt_buttons:
+            button.topics.append({
+                "brokerid": "ha-button-plus",
+                "topic": f"buttonplus/{device_id}/button/{button.button_id}/click",
+                "payload": "press",
+                "eventtype": 0
+            })
+
+        return device_config
