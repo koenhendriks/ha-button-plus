@@ -14,24 +14,48 @@ from homeassistant.helpers import aiohttp_client
 from .button_plus_api.api_client import ApiClient
 from .button_plus_api.local_api_client import LocalApiClient
 from .button_plus_api.model import DeviceConfiguration
+from homeassistant.helpers.network import get_url
 
 from .const import DOMAIN  # pylint:disable=unused-import
-
 
 _LOGGER = logging.getLogger(__name__)
 
 
-class ConfigFlow(config_entries.ConfigFlow,                 domain=DOMAIN):
+class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Button+."""
+
+    def __init__(self):
+        self.mqtt_entry = None
 
     VERSION = 1
     CONNECTION_CLASS = config_entries.CONN_CLASS_LOCAL_PUSH
 
     async def async_step_user(self, user_input=None):
-        """Handle the initial Button+ setup, showing the 2 options."""
+        """Handle the initial Button+ setup, showing the 2 options and checking the MQTT integration."""
+        mqtt_entries = self.hass.config_entries.async_entries(domain="mqtt")
+
+        if len(mqtt_entries) < 1:
+            mqtt_url = f'{get_url(self.hass)}/config/integrations/integration/mqtt'
+
+            return self.async_abort(
+                reason="mqtt_not_enabled",
+                description_placeholders={
+                    "mqtt_integration_link": mqtt_url
+                })
+        mqtt_entry = mqtt_entries[0]
+        broker = mqtt_entry.data.get("broker")
+        broker_port = mqtt_entry.data.get("port")
+        broker_username = mqtt_entry.data.get("username", "(No authentication)")
+        self.mqtt_entry = mqtt_entry
+
         return self.async_show_menu(
             step_id="user",
             menu_options=["fetch_website", "manual"],
+            description_placeholders={
+                "mqtt_broker": broker,
+                "mqtt_broker_port": broker_port,
+                "mqtt_user": broker_username
+            }
         )
 
     async def async_step_manual(self, user_input=None):
@@ -61,7 +85,7 @@ class ConfigFlow(config_entries.ConfigFlow,                 domain=DOMAIN):
                         traceback.format_exc()
                     )
 
-                    errors["base"] = "Error connecting or reading from {ip}"
+                    errors["base"] = f"Error connecting or reading from {ip}"
                 except Exception as ex:  # pylint: disable=broad-except
                     _LOGGER.error(
                         f"{DOMAIN} Exception in login : %s - traceback: %s",
@@ -117,7 +141,7 @@ class ConfigFlow(config_entries.ConfigFlow,                 domain=DOMAIN):
                         device_id = device_config.get('info').get('id')
                         last_entry = self.async_create_entry(
                             title=f"{device_name}",
-                            description=f"Base module on {device_ip} with local id {device_id} adn website id {device_website_id}",
+                            description=f"Base module on {device_ip} with local id {device_id} and website id {device_website_id}",
                             data=device_config
                         )
 

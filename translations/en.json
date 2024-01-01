@@ -1,11 +1,10 @@
 {
   "config": {
     "abort": {
-      "already_configured": "Service is already configured",
-      "existing_instance_updated": "Updated existing configuration."
+      "mqtt_not_enabled": "The MQTT integration is not enabled. Please add this first here: {mqtt_integration_link}"
     },
     "error": {
-      "cannot_connect": "Failed to connect",
+      "cannot_connect": "Failed to connect, see log for more info",
       "button_plus_connection": "Error connecting or reading from https://api.button.plus/ See log for more info",
       "invalid_ip": "The IP ' {ip} ' is not a valid IPv4 address."
     },
@@ -35,7 +34,7 @@
           "fetch_website": "Fetch all devices from Button.plus website",
           "manual": "Manually enter single device by local IP"
         },
-        "description": "Pick the desired option to setup your Button+ devices."
+        "description": "The MQTT broker configured in Home Assistant will be used:\n - Broker: {mqtt_broker}\n - Port:{mqtt_broker_port}\n  - Authentication: {mqtt_user}\n\n This broker configuration will be added to each device with the name of this integration; 'ha-button-plus' and can be found in the Button+ interface.\n\n The buttons of the Button+ will be configured to send clicks on a topic in this broker and the integration will sync these with the home assistant button entities. \n\n To continue, pick the desired option to setup your Button+ devices."
       }
     }
   }
