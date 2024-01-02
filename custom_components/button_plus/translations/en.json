@@ -30,11 +30,20 @@
         "description": "Manually enter Button+ device IP address"
       },
       "user": {
+        "data": {
+          "broker": "Address to reach the broker."
+        },
+        "data_description": {
+          "broker": "Leave this unchanged if you're unsure what this is."
+        },
+        "description": "The MQTT broker configured in Home Assistant will be used:\n - Broker: {mqtt_broker}\n - Port:{mqtt_broker_port}\n  - Authentication: {mqtt_user}\n\n This broker configuration will be added to each device with the name of this integration; 'ha-button-plus' and can be found in the Button+ interface.\n\n The buttons of the Button+ will be configured to send clicks on a topic in this broker and the integration will sync these with the home assistant button entities. \n\n You can override the MQTT broker endpoint if you want here."
+      },
+      "choose_entry": {
         "menu_options": {
           "fetch_website": "Fetch all devices from Button.plus website",
           "manual": "Manually enter single device by local IP"
         },
-        "description": "The MQTT broker configured in Home Assistant will be used:\n - Broker: {mqtt_broker}\n - Port:{mqtt_broker_port}\n  - Authentication: {mqtt_user}\n\n This broker configuration will be added to each device with the name of this integration; 'ha-button-plus' and can be found in the Button+ interface.\n\n The buttons of the Button+ will be configured to send clicks on a topic in this broker and the integration will sync these with the home assistant button entities. \n\n To continue, pick the desired option to setup your Button+ devices."
+        "description": "To continue, pick the desired option to setup your Button+ devices."
       }
     }
   }
