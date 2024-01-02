@@ -1,10 +1,10 @@
 # Button+ integration for Home Assistant
 
-![img.png](resource%2Fimg.png)  
-This integration allows you to setup and control your Button+ device from Home Assistant.
+![img.png](img.png)  
+This integration allows you to set up and control your Button+ device from Home Assistant.
 
 
-Currently this project is in development and **highly** unstable.
+Currently, this project is in development and **highly** unstable.
 
 ## Documentation
 
