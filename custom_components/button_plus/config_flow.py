@@ -9,7 +9,7 @@ from json import JSONDecodeError
 
 import voluptuous as vol
 from homeassistant import config_entries, exceptions
-from homeassistant.const import CONF_IP_ADDRESS, CONF_EMAIL, CONF_PASSWORD
+from homeassistant.const import CONF_IP_ADDRESS, CONF_EMAIL, CONF_PASSWORD, CONF_HOST
 from homeassistant.helpers import aiohttp_client
 from .button_plus_api.api_client import ApiClient
 from .button_plus_api.local_api_client import LocalApiClient
@@ -26,12 +26,14 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     def __init__(self):
         self.mqtt_entry = None
+        self.broker_endpoint = None
 
     VERSION = 1
     CONNECTION_CLASS = config_entries.CONN_CLASS_LOCAL_PUSH
 
     async def async_step_user(self, user_input=None):
         """Handle the initial Button+ setup, showing the 2 options and checking the MQTT integration."""
+        errors = {}
         mqtt_entries = self.hass.config_entries.async_entries(domain="mqtt")
 
         if len(mqtt_entries) < 1:
@@ -42,20 +44,37 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 description_placeholders={
                     "mqtt_integration_link": mqtt_url
                 })
+
         mqtt_entry = mqtt_entries[0]
         broker = self.get_mqtt_endpoint(mqtt_entry.data.get("broker"))
         broker_port = mqtt_entry.data.get("port")
         broker_username = mqtt_entry.data.get("username", "(No authentication)")
         self.mqtt_entry = mqtt_entry
 
-        return self.async_show_menu(
+        if user_input is not None:
+            self.broker_endpoint = user_input.get("broker", broker)
+            return await self.async_step_choose_entry()
+
+        return self.async_show_form(
             step_id="user",
-            menu_options=["fetch_website", "manual"],
+            data_schema=vol.Schema({
+                vol.Required("broker", default=broker): str
+            }),
+            errors=errors,
             description_placeholders={
                 "mqtt_broker": broker,
                 "mqtt_broker_port": broker_port,
                 "mqtt_user": broker_username
             }
+        )
+
+    async def async_step_choose_entry(self, user_input=None):
+        errors = {}
+        # if user_input is not None:
+        return self.async_show_menu(
+            step_id="choose_entry",
+            menu_options=["fetch_website", "manual"],
+            description_placeholders={}
         )
 
     async def async_step_manual(self, user_input=None):
@@ -198,14 +217,13 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     def add_broker_to_config(self, device_config: DeviceConfiguration) -> DeviceConfiguration:
         mqtt_entry = self.mqtt_entry
-        broker_endpoint = self.get_mqtt_endpoint(mqtt_entry.data.get("broker"))
         broker_port = mqtt_entry.data.get("port")
         broker_username = mqtt_entry.data.get("username", "")
         broker_password = mqtt_entry.data.get("password", "")
 
         broker = MqttBroker(
             broker_id=f"ha-button-plus",
-            url=f"mqtt://{broker_endpoint}/",
+            url=f"mqtt://{self.broker_endpoint}/",
             port=broker_port,
             ws_port=9001,
             username=broker_username,
