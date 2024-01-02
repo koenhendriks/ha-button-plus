@@ -5,14 +5,15 @@
     "@koenhendriks"
   ],
   "config_flow": true,
-  "dependencies": ["mqtt"],
-  "documentation": "https://github.com/koenhendriks/ha-button-plus",
-  "issue_tracker": "https://github.com/koenhendriks/ha-button-plus/issues",
-  "homekit": {},
-  "iot_class": "local_push",
-  "integration_type": "hub",
-  "requirements": [
+  "dependencies": [
+    "mqtt"
   ],
+  "documentation": "https://github.com/koenhendriks/ha-button-plus",
+  "homekit": {},
+  "integration_type": "hub",
+  "iot_class": "local_push",
+  "issue_tracker": "https://github.com/koenhendriks/ha-button-plus/issues",
+  "requirements": [],
   "version": "0.0.1",
   "zeroconf": []
 }
