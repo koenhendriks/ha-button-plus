@@ -43,7 +43,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     "mqtt_integration_link": mqtt_url
                 })
         mqtt_entry = mqtt_entries[0]
-        broker = mqtt_entry.data.get("broker")
+        broker = self.get_mqtt_endpoint(mqtt_entry.data.get("broker"))
         broker_port = mqtt_entry.data.get("port")
         broker_username = mqtt_entry.data.get("username", "(No authentication)")
         self.mqtt_entry = mqtt_entry
@@ -198,7 +198,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     def add_broker_to_config(self, device_config: DeviceConfiguration) -> DeviceConfiguration:
         mqtt_entry = self.mqtt_entry
-        broker_endpoint = mqtt_entry.data.get("broker")
+        broker_endpoint = self.get_mqtt_endpoint(mqtt_entry.data.get("broker"))
         broker_port = mqtt_entry.data.get("port")
         broker_username = mqtt_entry.data.get("username", "")
         broker_password = mqtt_entry.data.get("password", "")
@@ -227,3 +227,10 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             })
 
         return device_config
+
+    def get_mqtt_endpoint(self, endpoint: str) -> str:
+        # Internal add-on is not reachable from the Button+ device so we use the hass ip
+        if endpoint == "core-mosquitto":
+            _LOGGER.debug(f'mqtt host is internal so use {self.hass.config.api.host}')
+            return self.hass.config.api.host
+        return endpoint
