@@ -1,0 +1,9 @@
+{
+    "name": "Button+ Integration",
+    "content_in_root": false,
+    "zip_release": false,
+    "render_readme": true,
+    "hide_default_branch": true,
+    "country": ["US", "UK"],
+    "homeassistant": "2023.8.0"
+}
