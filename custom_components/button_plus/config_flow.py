@@ -14,6 +14,7 @@ from homeassistant.helpers import aiohttp_client
 from .button_plus_api.api_client import ApiClient
 from .button_plus_api.local_api_client import LocalApiClient
 from .button_plus_api.model import DeviceConfiguration, MqttBroker
+from .button_plus_api.event_type import EventType
 from homeassistant.helpers.network import get_url
 
 from .const import DOMAIN  # pylint:disable=unused-import
@@ -243,11 +244,29 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         device_id = device_config.info.device_id
 
         for button in device_config.mqtt_buttons:
+
+            # Create topics for button main label
+            button.topics.append({
+                "brokerid": "ha-button-plus",
+                "topic": f"buttonplus/{device_id}/button/{button.button_id}/label",
+                "payload": "",
+                "eventtype": EventType.LABEL
+            })
+
+            # Create topics for button top label
+            button.topics.append({
+                "brokerid": "ha-button-plus",
+                "topic": f"buttonplus/{device_id}/button/{button.button_id}/top_label",
+                "payload": "",
+                "eventtype": EventType.TOPLABEL
+            })
+
+            # Create topics for button click
             button.topics.append({
                 "brokerid": "ha-button-plus",
                 "topic": f"buttonplus/{device_id}/button/{button.button_id}/click",
                 "payload": "press",
-                "eventtype": 0
+                "eventtype": EventType.CLICK
             })
 
         return device_config

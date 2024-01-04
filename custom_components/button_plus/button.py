@@ -5,13 +5,11 @@ import logging
 
 from homeassistant.components.button import ButtonEntity, ButtonDeviceClass
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant, callback
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from . import ButtonPlusHub
 
 from .const import DOMAIN, MANUFACTURER
-from .coordinator import ButtonPlusCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -26,23 +24,20 @@ async def async_setup_entry(
     """Add button_entities for passed config_entry in HA."""
 
     hub: ButtonPlusHub = hass.data[DOMAIN][config_entry.entry_id]
-    coordinator = ButtonPlusCoordinator(hass, hub)
-
-    await coordinator.async_config_entry_first_refresh()
 
     buttons = hub.config.mqtt_buttons
 
     for button in buttons:
         _LOGGER.debug(f"Creating button with parameters: {button.button_id} {button.label} {hub.hub_id}")
-        entity = ButtonPlusButton(coordinator, button.button_id, hub)
+        entity = ButtonPlusButton(button.button_id, hub)
         button_entities.append(entity)
         hub.add_button(button.button_id, entity)
 
     async_add_entities(button_entities)
 
 
-class ButtonPlusButton(CoordinatorEntity, ButtonEntity):
-    def __init__(self, coordinator, btn_id: int, hub: ButtonPlusHub):
+class ButtonPlusButton(ButtonEntity):
+    def __init__(self, btn_id: int, hub: ButtonPlusHub):
         self._is_on = False
         self._hub_id = hub.hub_id
         self._hub = hub
@@ -53,13 +48,6 @@ class ButtonPlusButton(CoordinatorEntity, ButtonEntity):
         self._name = f'Button {btn_id}'
         self._device_class = ButtonDeviceClass.IDENTIFY
 
-        super().__init__(coordinator, context={btn_id})
-
-    @callback
-    def _handle_coordinator_update(self) -> None:
-        """Handle updated data from the coordinator."""
-        _LOGGER.debug(f"Coordinator update for {self._btn_id}")
-
     @property
     def name(self) -> str:
         """Return the display name of this button."""
@@ -67,7 +55,6 @@ class ButtonPlusButton(CoordinatorEntity, ButtonEntity):
 
     @property
     def should_poll(self) -> bool:
-        """Return the display name of this button."""
         return False
 
     @property
@@ -99,6 +86,6 @@ class ButtonPlusButton(CoordinatorEntity, ButtonEntity):
 
         return device_info
 
-    async def async_press(self, from_mqtt=False) -> None:
+    async def async_press(self) -> None:
         """Handle the button press."""
-        _LOGGER.debug(f"async press from mqtt: {from_mqtt}")
+        _LOGGER.debug(f"async press from mqtt button: {self._btn_id}")

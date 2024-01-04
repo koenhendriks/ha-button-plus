@@ -27,6 +27,8 @@ class ButtonPlusHub:
         self._client = LocalApiClient(config.info.ip_address, aiohttp_client.async_get_clientsession(hass))
         self.online = True
         self.button_entities = {}
+        self.label_entities = {}
+        self.top_label_entities = {}
 
         device_registry = dr.async_get(hass)
 
@@ -53,3 +55,9 @@ class ButtonPlusHub:
 
     def add_button(self, button_id, entity):
         self.button_entities[str(button_id)] = entity
+
+    def add_label(self, button_id, entity):
+        self.label_entities[str(button_id)] = entity
+
+    def add_top_label(self, button_id, entity):
+        self.top_label_entities[str(button_id)] = entity
