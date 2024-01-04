@@ -8,9 +8,8 @@ from homeassistant.core import HomeAssistant
 
 from . import buttonplushub
 from .button_plus_api.model import DeviceConfiguration
-from .buttonplushub import ButtonPlusHub
+from .buttonplushub import ButtonPlusHub, ButtonPlusCoordinator
 from .const import DOMAIN
-from .coordinator import ButtonPlusCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
