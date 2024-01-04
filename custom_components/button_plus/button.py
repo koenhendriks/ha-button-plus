@@ -26,23 +26,20 @@ async def async_setup_entry(
     """Add button_entities for passed config_entry in HA."""
 
     hub: ButtonPlusHub = hass.data[DOMAIN][config_entry.entry_id]
-    coordinator = ButtonPlusCoordinator(hass, hub)
-
-    await coordinator.async_config_entry_first_refresh()
 
     buttons = hub.config.mqtt_buttons
 
     for button in buttons:
         _LOGGER.debug(f"Creating button with parameters: {button.button_id} {button.label} {hub.hub_id}")
-        entity = ButtonPlusButton(coordinator, button.button_id, hub)
+        entity = ButtonPlusButton(button.button_id, hub)
         button_entities.append(entity)
         hub.add_button(button.button_id, entity)
 
     async_add_entities(button_entities)
 
 
-class ButtonPlusButton(CoordinatorEntity, ButtonEntity):
-    def __init__(self, coordinator, btn_id: int, hub: ButtonPlusHub):
+class ButtonPlusButton(ButtonEntity):
+    def __init__(self, btn_id: int, hub: ButtonPlusHub):
         self._is_on = False
         self._hub_id = hub.hub_id
         self._hub = hub
@@ -52,8 +49,6 @@ class ButtonPlusButton(CoordinatorEntity, ButtonEntity):
         self._attr_name = f'button-{btn_id}'
         self._name = f'Button {btn_id}'
         self._device_class = ButtonDeviceClass.IDENTIFY
-
-        super().__init__(coordinator, context={btn_id})
 
     @property
     def name(self) -> str:
