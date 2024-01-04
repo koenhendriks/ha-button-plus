@@ -86,6 +86,6 @@ class ButtonPlusButton(ButtonEntity):
 
         return device_info
 
-    async def async_press(self, from_mqtt=False) -> None:
+    async def async_press(self) -> None:
         """Handle the button press."""
-        _LOGGER.debug(f"async press from mqtt: {from_mqtt}")
+        _LOGGER.debug(f"async press from mqtt button: {self._btn_id}")
