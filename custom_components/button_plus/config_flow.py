@@ -100,7 +100,6 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
                     self.add_broker_to_config(device_config)
                     self.add_topics_to_buttons(device_config)
-                    self.add_topics_to_labels(device_config)
 
                     await api_client.push_config(device_config)
 
@@ -257,7 +256,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             # Create topics for button top label
             button.topics.append({
                 "brokerid": "ha-button-plus",
-                "topic": f"buttonplus/{device_id}/button/{button.button_id}/toplabel",
+                "topic": f"buttonplus/{device_id}/button/{button.button_id}/top_label",
                 "payload": "",
                 "eventtype": EventType.TOPLABEL
             })

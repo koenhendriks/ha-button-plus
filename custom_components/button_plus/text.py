@@ -2,11 +2,11 @@
 from __future__ import annotations
 
 import logging
-from typing import Any
 
 from homeassistant.components.text import TextEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.components.mqtt import client as mqtt
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import ButtonPlusHub
@@ -15,7 +15,7 @@ from .const import DOMAIN, MANUFACTURER
 
 _LOGGER = logging.getLogger(__name__)
 
-texts = []
+text_entities = []
 
 
 async def async_setup_entry(
@@ -23,17 +23,26 @@ async def async_setup_entry(
         config_entry: ConfigEntry,
         async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Add switches for passed config_entry in HA."""
+    """Add text entity for each top and main label from config_entry in HA."""
 
     hub: ButtonPlusHub = hass.data[DOMAIN][config_entry.entry_id]
+
     buttons = hub.config.mqtt_buttons
 
     for button in buttons:
-        # _LOGGER.debug(f"Creating Texts with parameters: {button.button_id} {button.top_label} {button.label} {hub.hub_id}")
-        texts.append(ButtonPlusLabel(button.button_id, hub, button.label))
-        texts.append(ButtonPlusTopLabel(button.button_id, hub, button.top_label))
+        _LOGGER.debug(
+            f"Creating Texts with parameters: {button.button_id} {button.top_label} {button.label} {hub.hub_id}")
 
-    async_add_entities(texts)
+        label_entity = ButtonPlusLabel(button.button_id, hub, button.label)
+        top_label_entity = ButtonPlusTopLabel(button.button_id, hub, button.top_label)
+
+        text_entities.append(label_entity)
+        text_entities.append(top_label_entity)
+
+        hub.add_label(button.button_id, label_entity)
+        hub.add_top_label(button.button_id, top_label_entity)
+
+    async_add_entities(text_entities)
 
 
 class ButtonPlusText(TextEntity):
@@ -46,6 +55,10 @@ class ButtonPlusText(TextEntity):
         self.entity_id = f"text.{text_type}_{self._hub_id}_{btn_id}"
         self._attr_name = f'text-{text_type}-{btn_id}'
         self._attr_native_value = btn_label
+
+    @property
+    def should_poll(self) -> bool:
+        return False
 
     def update(self) -> None:
         """Fetch new state data for this label."""
@@ -84,12 +97,12 @@ class ButtonPlusText(TextEntity):
 
         return device_info
 
-    def set_value(self, value: str) -> None:
-        """Set the text value."""
-        self._attr_native_value = value
-
     async def async_set_value(self, value: str) -> None:
-        """Set the text value from mqtt."""
+        """Set the text value and publish to mqtt."""
+        label_topic = f"buttonplus/{self._hub_id}/button/{self._btn_id}/{self._text_type}"
+        _LOGGER.debug(f"ButtonPlus label update for {self.entity_id}")
+        _LOGGER.debug(f"ButtonPlus label update to {label_topic} with new value: {value}")
+        await mqtt.async_publish(hass=self.hass, topic=label_topic, payload=value, qos=0)
         self._attr_native_value = value
 
 
