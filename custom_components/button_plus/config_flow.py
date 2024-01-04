@@ -24,6 +24,12 @@ _LOGGER = logging.getLogger(__name__)
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Button+."""
 
+    local_brokers = [
+        "core-mosquitto",
+        "127.0.0.1",
+        "localhost"
+    ]
+
     def __init__(self):
         self.mqtt_entry = None
         self.broker_endpoint = None
@@ -248,7 +254,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     def get_mqtt_endpoint(self, endpoint: str) -> str:
         # Internal add-on is not reachable from the Button+ device so we use the hass ip
-        if endpoint == "core-mosquitto":
-            _LOGGER.debug(f'mqtt host is internal so use {self.hass.config.api.host}')
+        if endpoint in self.local_brokers:
+            _LOGGER.debug(f'mqtt host is internal so use {self.hass.config.api.host} instead of {endpoint}')
             return self.hass.config.api.host
         return endpoint
