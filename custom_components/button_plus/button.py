@@ -55,11 +55,6 @@ class ButtonPlusButton(CoordinatorEntity, ButtonEntity):
 
         super().__init__(coordinator, context={btn_id})
 
-    @callback
-    def _handle_coordinator_update(self) -> None:
-        """Handle updated data from the coordinator."""
-        _LOGGER.debug(f"Coordinator update for {self._btn_id}")
-
     @property
     def name(self) -> str:
         """Return the display name of this button."""
@@ -67,7 +62,6 @@ class ButtonPlusButton(CoordinatorEntity, ButtonEntity):
 
     @property
     def should_poll(self) -> bool:
-        """Return the display name of this button."""
         return False
 
     @property
