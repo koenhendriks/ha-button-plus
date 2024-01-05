@@ -102,7 +102,7 @@ class ButtonPlusText(TextEntity):
         label_topic = f"buttonplus/{self._hub_id}/button/{self._btn_id}/{self._text_type}"
         _LOGGER.debug(f"ButtonPlus label update for {self.entity_id}")
         _LOGGER.debug(f"ButtonPlus label update to {label_topic} with new value: {value}")
-        await mqtt.async_publish(hass=self.hass, topic=label_topic, payload=value, qos=0)
+        await mqtt.async_publish(hass=self.hass, topic=label_topic, payload=value, qos=0, retain=True)
         self._attr_native_value = value
 
 
