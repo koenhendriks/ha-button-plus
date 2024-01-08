@@ -24,7 +24,8 @@ async def async_setup_entry(
     """Add switches for passed config_entry in HA."""
 
     hub: ButtonPlusHub = hass.data[DOMAIN][config_entry.entry_id]
-    buttons = hub.config.mqtt_buttons
+    active_connectors = [connector.connector_id for connector in filter(lambda c: c.connector_type in [1,2],hub.config.info.connectors)]
+    buttons = filter(lambda b: b.button_id//2 in active_connectors,hub.config.mqtt_buttons)
 
     for button in buttons:
         # _LOGGER.debug(f"Creating switch with parameters: {button.button_id} {button.label} {hub.hub_id}")
@@ -44,6 +45,7 @@ class ButtonPlusSwitch(SwitchEntity):
         self._attr_name = f'switch-{btn_id}'
         self._name = f'Button {btn_id}'
         self._device_class = SwitchDeviceClass.SWITCH
+        self._connector = hub.config.info.connectors[btn_id//2]
 
     @property
     def name(self) -> str:
@@ -58,24 +60,17 @@ class ButtonPlusSwitch(SwitchEntity):
             "manufacturer": MANUFACTURER,
         }
 
-        match self._btn_id:
-            case 0 | 1:
-                return {"identifiers": {(DOMAIN, self._hub_id)}}
-            case 2 | 3:
-                device_info["name"] = f"BAR Module 1"
-                device_info["connections"] = {("bar_module", 1)}
+        match self._connector.connector_type:
+            case 1:
+                device_info["name"] = f"BAR Module {self._connector.connector_id}"
+                device_info["connections"] = {("bar_module", self._connector.connector_id)}
                 device_info["model"] = "BAR Module"
-                device_info["identifiers"] = {(DOMAIN, f'{self._btn_id}_bar_module_1')}
-            case 4 | 5:
-                device_info["name"] = f"BAR Module 2"
-                device_info["connections"] = {("bar_module", 2)}
-                device_info["model"] = "BAR Module"
-                device_info["identifiers"] = {(DOMAIN, f'{self._btn_id}_bar_module_2')}
-            case 6 | 7:
-                device_info["name"] = f"BAR Module 3"
-                device_info["connections"] = {("bar_module", 3)}
-                device_info["model"] = "BAR Module"
-                device_info["identifiers"] = {(DOMAIN, f'{self._btn_id}_bar_module_3')}
+                device_info["identifiers"] = {(DOMAIN, f'{self._btn_id}_bar_module_{self._connector.connector_id}')}
+            case 2:
+                device_info["name"] = f"Display Module"
+                device_info["connections"] = {("display_module", 1)}
+                device_info["model"] = "Display Module"
+                device_info["identifiers"] = {(DOMAIN, f'{self._btn_id}_display_module')}
 
         return device_info
 

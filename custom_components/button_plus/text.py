@@ -26,8 +26,8 @@ async def async_setup_entry(
     """Add text entity for each top and main label from config_entry in HA."""
 
     hub: ButtonPlusHub = hass.data[DOMAIN][config_entry.entry_id]
-
-    buttons = hub.config.mqtt_buttons
+    active_connectors = [connector.connector_id for connector in filter(lambda c: c.connector_type in [1,2],hub.config.info.connectors)]
+    buttons = filter(lambda b: b.button_id//2 in active_connectors,hub.config.mqtt_buttons)
 
     for button in buttons:
         _LOGGER.debug(
@@ -55,6 +55,7 @@ class ButtonPlusText(TextEntity):
         self.entity_id = f"text.{text_type}_{self._hub_id}_{btn_id}"
         self._attr_name = f'text-{text_type}-{btn_id}'
         self._attr_native_value = btn_label
+        self._connector = hub.config.info.connectors[btn_id//2]
 
     @property
     def should_poll(self) -> bool:
@@ -74,26 +75,17 @@ class ButtonPlusText(TextEntity):
             "manufacturer": MANUFACTURER,
         }
 
-        match self._btn_id:
-            case 0 | 1:
-                return {"identifiers": {(DOMAIN, self._hub_id)}}
-
-            case 2 | 3:
-                device_info["name"] = f"BAR Module 1"
-                device_info["connections"] = {("bar_module", 1)}
+        match self._connector.connector_type:
+            case 1:
+                device_info["name"] = f"BAR Module {self._connector.connector_id}"
+                device_info["connections"] = {("bar_module", self._connector.connector_id)}
                 device_info["model"] = "BAR Module"
-                device_info["identifiers"] = {(DOMAIN, f'{self._btn_id}_bar_module_1')}
-
-            case 4 | 5:
-                device_info["name"] = f"BAR Module 2"
-                device_info["connections"] = {("bar_module", 2)}
-                device_info["model"] = "BAR Module"
-                device_info["identifiers"] = {(DOMAIN, f'{self._btn_id}_bar_module_2')}
-            case 6 | 7:
-                device_info["name"] = f"BAR Module 3"
-                device_info["connections"] = {("bar_module", 3)}
-                device_info["model"] = "BAR Module"
-                device_info["identifiers"] = {(DOMAIN, f'{self._btn_id}_bar_module_3')}
+                device_info["identifiers"] = {(DOMAIN, f'{self._btn_id}_bar_module_{self._connector.connector_id}')}
+            case 2:
+                device_info["name"] = f"Display Module"
+                device_info["connections"] = {("display_module", 1)}
+                device_info["model"] = "Display Module"
+                device_info["identifiers"] = {(DOMAIN, f'{self._btn_id}_display_module')}
 
         return device_info
 
