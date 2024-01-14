@@ -26,8 +26,14 @@ async def async_setup_entry(
     """Add text entity for each top and main label from config_entry in HA."""
 
     hub: ButtonPlusHub = hass.data[DOMAIN][config_entry.entry_id]
-    active_connectors = [connector.connector_id for connector in filter(lambda c: c.connector_type in [1,2],hub.config.info.connectors)]
-    buttons = filter(lambda b: b.button_id//2 in active_connectors,hub.config.mqtt_buttons)
+
+    active_connectors = [
+        connector.connector_id
+        for connector in hub.config.info.connectors
+        if connector.connector_type in [1, 2]
+    ]
+
+    buttons = filter(lambda b: b.button_id // 2 in active_connectors, hub.config.mqtt_buttons)
 
     for button in buttons:
         _LOGGER.debug(
@@ -55,7 +61,7 @@ class ButtonPlusText(TextEntity):
         self.entity_id = f"text.{text_type}_{self._hub_id}_{btn_id}"
         self._attr_name = f'text-{text_type}-{btn_id}'
         self._attr_native_value = btn_label
-        self._connector = hub.config.info.connectors[btn_id//2]
+        self._connector = hub.config.info.connectors[btn_id // 2]
 
     @property
     def should_poll(self) -> bool:
