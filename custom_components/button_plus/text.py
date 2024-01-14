@@ -4,6 +4,7 @@ from __future__ import annotations
 import logging
 
 from homeassistant.components.text import TextEntity
+
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.components.mqtt import client as mqtt
@@ -102,6 +103,7 @@ class ButtonPlusText(TextEntity):
         _LOGGER.debug(f"ButtonPlus label update to {label_topic} with new value: {value}")
         await mqtt.async_publish(hass=self.hass, topic=label_topic, payload=value, qos=0, retain=True)
         self._attr_native_value = value
+        self.async_write_ha_state()
 
 
 class ButtonPlusLabel(ButtonPlusText):
