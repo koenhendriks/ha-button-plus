@@ -243,7 +243,13 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     def add_topics_to_buttons(self, device_config) -> DeviceConfiguration:
         device_id = device_config.info.device_id
 
-        for button in device_config.mqtt_buttons:
+        active_connectors = [
+            connector.connector_id
+            for connector in device_config.info.connectors
+            if connector.connector_type in [1, 2]
+        ]
+
+        for button in filter(lambda b: b.button_id // 2 in active_connectors, device_config.mqtt_buttons):
 
             # Create topics for button main label
             button.topics.append({

@@ -45,6 +45,7 @@ class ButtonPlusLight(LightEntity):
         self.entity_id = f"light.{light_type}_{self._hub_id}_{btn_id}"
         self._attr_name = f'light-{light_type}-{btn_id}'
         self._state = False
+        self._connector = hub.config.info.connectors[btn_id // 2]
 
     @property
     def is_on(self) -> bool | None:
@@ -76,26 +77,17 @@ class ButtonPlusLight(LightEntity):
             "manufacturer": MANUFACTURER,
         }
 
-        match self._btn_id:
-            case 0 | 1:
-                return {"identifiers": {(DOMAIN, self._hub_id)}}
-
-            case 2 | 3:
-                device_info["name"] = f"BAR Module 1"
-                device_info["connections"] = {("bar_module", 1)}
+        match self._connector.connector_type:
+            case 1:
+                device_info["name"] = f"BAR Module {self._connector.connector_id}"
+                device_info["connections"] = {("bar_module", self._connector.connector_id)}
                 device_info["model"] = "BAR Module"
-                device_info["identifiers"] = {(DOMAIN, f'{self._btn_id}_bar_module_1')}
-
-            case 4 | 5:
-                device_info["name"] = f"BAR Module 2"
-                device_info["connections"] = {("bar_module", 2)}
-                device_info["model"] = "BAR Module"
-                device_info["identifiers"] = {(DOMAIN, f'{self._btn_id}_bar_module_2')}
-            case 6 | 7:
-                device_info["name"] = f"BAR Module 3"
-                device_info["connections"] = {("bar_module", 3)}
-                device_info["model"] = "BAR Module"
-                device_info["identifiers"] = {(DOMAIN, f'{self._btn_id}_bar_module_3')}
+                device_info["identifiers"] = {(DOMAIN, f'{self._btn_id}_bar_module_{self._connector.connector_id}')}
+            case 2:
+                device_info["name"] = f"Display Module"
+                device_info["connections"] = {("display_module", 1)}
+                device_info["model"] = "Display Module"
+                device_info["identifiers"] = {(DOMAIN, f'{self._btn_id}_display_module')}
 
         return device_info
 
