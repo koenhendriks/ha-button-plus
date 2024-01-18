@@ -25,7 +25,7 @@ class ButtonPlusCoordinator(DataUpdateCoordinator):
         self.hub = hub
         self._hass = hass
         self._mqtt_subscribed_buttons = False
-        self._mqtt_topic_buttons = "buttonplus/+/button/+/click"
+        self._mqtt_topic_buttons = f"buttonplus/{hub.hub_id}/button/+/click"
 
     async def _async_update_data(self):
         """Create MQTT subscriptions for buttonplus """
