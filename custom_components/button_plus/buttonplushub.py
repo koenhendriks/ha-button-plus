@@ -22,7 +22,7 @@ class ButtonPlusHub:
         _LOGGER.debug(f"New hub with config {config.core}")
         self._hass = hass
         self.config = config
-        self._name = config.core.name
+        self._name = config.info.device_id
         self._id = self.config.info.device_id
         self._client = LocalApiClient(config.info.ip_address, aiohttp_client.async_get_clientsession(hass))
         self.online = True
