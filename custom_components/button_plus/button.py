@@ -77,12 +77,12 @@ class ButtonPlusButton(ButtonEntity):
                 device_info["name"] = f"BAR Module {self._connector.connector_id}"
                 device_info["connections"] = {("bar_module", self._connector.connector_id)}
                 device_info["model"] = "BAR Module"
-                device_info["identifiers"] = {(DOMAIN, f'{self._btn_id}_bar_module_{self._connector.connector_id}')}
+                device_info["identifiers"] = {(DOMAIN, f'{self._hub.hub_id}_{self._btn_id}_bar_module_{self._connector.connector_id}')}
             case 2:
                 device_info["name"] = f"Display Module"
                 device_info["connections"] = {("display_module", 1)}
                 device_info["model"] = "Display Module"
-                device_info["identifiers"] = {(DOMAIN, f'{self._btn_id}_display_module')}
+                device_info["identifiers"] = {(DOMAIN, f'{self._hub.hub_id}_{self._btn_id}_display_module')}
 
         return device_info
 
