@@ -8,6 +8,7 @@ from homeassistant.components.text import TextEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.components.mqtt import client as mqtt
+from homeassistant.helpers import template
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import ButtonPlusHub
@@ -98,11 +99,13 @@ class ButtonPlusText(TextEntity):
 
     async def async_set_value(self, value: str) -> None:
         """Set the text value and publish to mqtt."""
+        parse_value: Any = template.Template(value, self.hass).async_render(parse_result=False)
+
         label_topic = f"buttonplus/{self._hub_id}/button/{self._btn_id}/{self._text_type}"
         _LOGGER.debug(f"ButtonPlus label update for {self.entity_id}")
-        _LOGGER.debug(f"ButtonPlus label update to {label_topic} with new value: {value}")
-        await mqtt.async_publish(hass=self.hass, topic=label_topic, payload=value, qos=0, retain=True)
-        self._attr_native_value = value
+        _LOGGER.debug(f"ButtonPlus label update to {label_topic} with new value: {parse_value}")
+        await mqtt.async_publish(hass=self.hass, topic=label_topic, payload=parse_value, qos=0, retain=True)
+        self._attr_native_value = parse_value
         self.async_write_ha_state()
 
 
