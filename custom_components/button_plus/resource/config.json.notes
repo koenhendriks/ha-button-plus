@@ -1,5 +1,5 @@
 {
-    "info": { 
+    "info": {
         "largedisplay": 3, // on which connector the large display is hooked up?
         "i2cs": [], // serial communication data probably
         "connectors": [ // Which button+ modules are attached after the screen and the 2 buttons
@@ -16,13 +16,27 @@
     },
     "core": {
         "name": "demo3", // Button+ set name
-        "location": "Living Room", // location where its found 
+        "location": "Living Room", // location where its found
         "color": 15140872, // 24 bit integer representation of the main color
-        "invert": true // wether to invert colors
+        "invert": true, // wether to invert colors
+        "topics": [ //active topics
+            {
+              "brokerid": "ha-button-plus",
+              "topic": "buttonplus/demo3/brightness/large",
+              "payload": "",
+              "eventtype": 24
+            },
+            {
+              "brokerid": "ha-button-plus",
+              "topic": "buttonplus/demo3/brightness/mini",
+              "payload": "",
+              "eventtype": 25
+            }
+          ]
     },
     "mqttbuttons": [ // all possible available button configurations with what mqtt to publish or subscribe
         {
-            "id": 0,   
+            "id": 0,
             "label": "Btn 0",
             "topics": []
         },
@@ -52,14 +66,14 @@
             "topics": []
         },
         {
-            "id": 6, // not following this id scheme yet, the left display button has id 6 for some reason. probably going over each connector and its type 
+            "id": 6, // not following this id scheme yet, the left display button has id 6 for some reason. probably going over each connector and its type
             "label": "Btn 8", // label of this button
             "topics": [ // array of mqtt topics to publish or subscribe
                 {
                     "brokerid": "buttonplus",
                     "topic": "buttonplus/abc",
                     "payload": "dummy",
-                    "eventtype": 0 
+                    "eventtype": 0
                     // different types of event we can have topics for in mqtt:
                     // 0 = 'Click'
                     // 1 = 'Long press'
@@ -125,7 +139,7 @@
             // 5 = 'Center Right'
             // 6 = 'Bottom Left'
             // 7 = 'Bottom Center'
-            // 8 = 'Bottom Right'    
+            // 8 = 'Bottom Right'
             "width": 60, // in % of the display width
             "label": "Central European Time",
             "round": 0, // Round the incoming payload to decimal places, 0 is round to whole numbers

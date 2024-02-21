@@ -16,6 +16,7 @@ from .button_plus_api.local_api_client import LocalApiClient
 from .button_plus_api.model import DeviceConfiguration, MqttBroker
 from .button_plus_api.event_type import EventType
 from homeassistant.helpers.network import get_url
+from packaging import version
 
 from .const import DOMAIN  # pylint:disable=unused-import
 
@@ -99,6 +100,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     device_config: DeviceConfiguration = DeviceConfiguration.from_json(json_config)
 
                     self.add_broker_to_config(device_config)
+                    self.add_topics_to_core(device_config)
                     self.add_topics_to_buttons(device_config)
 
                     await api_client.push_config(device_config)
@@ -240,7 +242,43 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         device_config.mqtt_brokers.append(broker)
         return device_config
 
-    def add_topics_to_buttons(self, device_config) -> DeviceConfiguration:
+    def add_topics_to_core(self, device_config : DeviceConfiguration) -> DeviceConfiguration:
+        device_id = device_config.info.device_id
+        min_version = "1.11"
+
+        if version.parse(device_config.info.firmware) < version.parse(min_version):
+            _LOGGER.debug(f"Current version {device_config.info.firmware} doesn't support the brightness, it must be at least firmware version {min_version}")
+            return
+
+        device_config.core.topics.append({
+            "brokerid": "ha-button-plus",
+            "topic": f"buttonplus/{device_id}/brightness/large",
+            "payload": "",
+            "eventtype": EventType.BRIGHTNESS_LARGE_DISPLAY
+        })
+
+        device_config.core.topics.append({
+            "brokerid": "ha-button-plus",
+            "topic": f"buttonplus/{device_id}/brightness/mini",
+            "payload": "",
+            "eventtype": EventType.BRIGHTNESS_MINI_DISPLAY
+        })
+
+        device_config.core.topics.append({
+            "brokerid": "ha-button-plus",
+            "topic": f"buttonplus/{device_id}/page/status",
+            "payload": "",
+            "eventtype": EventType.PAGE_STATUS
+        })
+
+        device_config.core.topics.append({
+            "brokerid": "ha-button-plus",
+            "topic": f"buttonplus/{device_id}/page/set",
+            "payload": "",
+            "eventtype": EventType.SET_PAGE
+        })
+
+    def add_topics_to_buttons(self, device_config : DeviceConfiguration) -> DeviceConfiguration:
         device_id = device_config.info.device_id
 
         active_connectors = [

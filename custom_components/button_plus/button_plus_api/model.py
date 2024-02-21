@@ -54,7 +54,8 @@ class Info:
 
 class Core:
     def __init__(self, name: str, location: str, auto_backup: bool, brightness_large_display: int,
-                 brightness_mini_display: int, led_color_front: int, led_color_wall: int, color: int):
+                 brightness_mini_display: int, led_color_front: int, led_color_wall: int, color: int,
+                 topics: List[Dict[str, Any]]):
         self.name = name
         self.location = location
         self.auto_backup = auto_backup
@@ -63,6 +64,7 @@ class Core:
         self.led_color_front = led_color_front
         self.led_color_wall = led_color_wall
         self.color = color
+        self.topics = topics
 
     @staticmethod
     def from_dict(data: Dict[str, Any]) -> 'Core':
@@ -74,7 +76,8 @@ class Core:
             brightness_mini_display=data['brightnessminidisplay'],
             led_color_front=data['ledcolorfront'],
             led_color_wall=data['ledcolorwall'],
-            color=data['color']
+            color=data['color'],
+            topics=data['topics']
         )
 
 
