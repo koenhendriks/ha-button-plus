@@ -1,6 +1,7 @@
 from homeassistant.components.button import ButtonEntity
 from . import DOMAIN, ButtonPlusHub
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
+from homeassistant.components.number import NumberEntity
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.components.mqtt import client as mqtt, ReceiveMessage
 
@@ -26,6 +27,8 @@ class ButtonPlusCoordinator(DataUpdateCoordinator):
         self._hass = hass
         self._mqtt_subscribed_buttons = False
         self._mqtt_topic_buttons = f"buttonplus/{hub.hub_id}/button/+/click"
+        self._mqtt_topic_brightness = f"buttonplus/{hub.hub_id}/brightness/+"
+        self._mqtt_topic_page = f"buttonplus/{hub.hub_id}/page/+"
 
     async def _async_update_data(self):
         """Create MQTT subscriptions for buttonplus """
@@ -39,6 +42,51 @@ class ButtonPlusCoordinator(DataUpdateCoordinator):
             )
             _LOGGER.debug(f"MQTT subscribed to {self._mqtt_topic_buttons}")
 
+
+        if not self._mqtt_subscribed_buttons:
+            self.unsubscribe_mqtt = await mqtt.async_subscribe(
+                self._hass,
+                self._mqtt_topic_brightness,
+                self.mqtt_brightness_callback,
+                0
+            )
+            _LOGGER.debug(f"MQTT subscribed to {self._mqtt_topic_brightness}")
+
+
+        if not self._mqtt_subscribed_buttons:
+            self.unsubscribe_mqtt = await mqtt.async_subscribe(
+                self._hass,
+                self._mqtt_topic_page,
+                self.mqtt_page_callback,
+                0
+            )
+            _LOGGER.debug(f"MQTT subscribed to {self._mqtt_topic_page}")
+
+    @callback
+    async def mqtt_page_callback(self, message: ReceiveMessage):
+        # Handle the message here
+        _LOGGER.debug(f"Received message on topic {message.topic}: {message.payload}")
+        match = re.search(r'/page/(\w+)', message.topic)
+        # is 'status' or 'set'
+        page_type = match.group(1)
+
+        # TODO: implement page control
+
+
+    @callback
+    async def mqtt_brightness_callback(self, message: ReceiveMessage):
+        # Handle the message here
+        _LOGGER.debug(f"Received message on topic {message.topic}: {message.payload}")
+        match = re.search(r'/brightness/(\w+)', message.topic)
+        brightness_type = match.group(1)
+
+        entity: NumberEntity = self.hub.brightness_entities[brightness_type]
+
+        value = float(message.payload)
+        entity._attr_native_value = value
+        entity.schedule_update_ha_state()
+
+    @callback
     async def mqtt_button_callback(self, message: ReceiveMessage):
         # Handle the message here
         _LOGGER.debug(f"Received message on topic {message.topic}: {message.payload}")

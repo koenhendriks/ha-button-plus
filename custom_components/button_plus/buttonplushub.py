@@ -29,6 +29,7 @@ class ButtonPlusHub:
         self.button_entities = {}
         self.label_entities = {}
         self.top_label_entities = {}
+        self.brightness_entities = {}
 
         device_registry = dr.async_get(hass)
 
@@ -61,3 +62,6 @@ class ButtonPlusHub:
 
     def add_top_label(self, button_id, entity):
         self.top_label_entities[str(button_id)] = entity
+
+    def add_brightness(self, identifier, entity):
+        self.brightness_entities[identifier] = entity
