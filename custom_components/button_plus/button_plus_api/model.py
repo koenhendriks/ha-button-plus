@@ -36,7 +36,7 @@ class Info:
         self.ip_address = ip_address
         self.firmware = firmware
         self.large_display = large_display
-        self.connectors = connectors
+        self.connectors : List[Connector] = connectors
         self.sensors = sensors
 
     @staticmethod
