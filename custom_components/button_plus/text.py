@@ -10,13 +10,13 @@ from homeassistant.core import HomeAssistant
 from homeassistant.components.mqtt import client as mqtt
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
+from custom_components.button_plus.button_plus_api.model import Connector
+
 from . import ButtonPlusHub
 
 from .const import DOMAIN, MANUFACTURER
 
 _LOGGER = logging.getLogger(__name__)
-
-text_entities = []
 
 
 async def async_setup_entry(
@@ -26,6 +26,7 @@ async def async_setup_entry(
 ) -> None:
     """Add text entity for each top and main label from config_entry in HA."""
 
+    text_entities = []
     hub: ButtonPlusHub = hass.data[DOMAIN][config_entry.entry_id]
 
     active_connectors = [
@@ -58,11 +59,25 @@ class ButtonPlusText(TextEntity):
         self._hub = hub
         self._hub_id = hub.hub_id
         self._text_type = text_type
-        self._attr_unique_id = f'text-{text_type}-{self._hub_id}-{btn_id}'
         self.entity_id = f"text.{text_type}_{self._hub_id}_{btn_id}"
         self._attr_name = f'text-{text_type}-{btn_id}'
         self._attr_native_value = btn_label
         self._connector = hub.config.info.connectors[btn_id // 2]
+        self.unique_id = self.unique_id_gen()
+
+    def unique_id_gen(self):
+
+        match self._connector.connector_type:
+            case 1:
+                return self.unique_id_gen_bar()
+            case 2:
+                return self.unique_id_gen_display()
+
+    def unique_id_gen_bar(self):
+        return f'text_{self._hub_id}_{self._btn_id}_bar_module_{self._connector.connector_id}_{self._text_type}'
+
+    def unique_id_gen_display(self):
+        return f'text_{self._hub_id}_{self._btn_id}_display_module_{self._text_type}'
 
     @property
     def should_poll(self) -> bool:
@@ -80,19 +95,20 @@ class ButtonPlusText(TextEntity):
         device_info = {
             "via_device": (DOMAIN, self._hub.hub_id),
             "manufacturer": MANUFACTURER,
+            "identifiers" : {(DOMAIN, self.unique_id)}
         }
 
         match self._connector.connector_type:
             case 1:
-                device_info["name"] = f"BAR Module {self._connector.connector_id}"
+                device_info["name"] = f"{self._hub_id} BAR Module {self._connector.connector_id}"
                 device_info["connections"] = {("bar_module", self._connector.connector_id)}
                 device_info["model"] = "BAR Module"
-                device_info["identifiers"] = {(DOMAIN, f'{self._hub.hub_id}_{self._btn_id}_bar_module_{self._connector.connector_id}')}
+                # device_info["identifiers"] = {(DOMAIN, f'{self._hub.hub_id}_{self._btn_id}_bar_module_{self._connector.connector_id}')}
             case 2:
-                device_info["name"] = f"Display Module"
+                device_info["name"] = f"{self._hub_id} Display Module"
                 device_info["connections"] = {("display_module", 1)}
                 device_info["model"] = "Display Module"
-                device_info["identifiers"] = {(DOMAIN, f'{self._hub.hub_id}_{self._btn_id}_display_module')}
+                # device_info["identifiers"] = {(DOMAIN, f'{self._hub.hub_id}_{self._btn_id}_display_module')}
 
         return device_info
 
