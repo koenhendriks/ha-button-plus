@@ -18,7 +18,6 @@ from .const import DOMAIN, MANUFACTURER
 
 _LOGGER = logging.getLogger(__name__)
 
-brightness = []
 
 
 async def async_setup_entry(
@@ -26,6 +25,9 @@ async def async_setup_entry(
         config_entry: ConfigEntry,
         async_add_entities: AddEntitiesCallback,
 ) -> None:
+
+    brightness = []
+
     """Add switches for passed config_entry in HA."""
 
     hub: ButtonPlusHub = hass.data[DOMAIN][config_entry.entry_id]
@@ -53,12 +55,12 @@ class ButtonPlusBrightness(NumberEntity):
         self._hub = hub
         self._hub_id = hub.hub_id
         self._brightness_type = brightness_type
-        self._attr_unique_id = f'brightness-{brightness_type}-{self._hub_id}'
         self.entity_id = f"brightness.{brightness_type}_{self._hub_id}"
         self._attr_name = f'brightness-{brightness_type}'
         self.event_type = event_type
         self._topics = hub.config.core.topics
         self._attr_icon = "mdi:television-ambient-light"
+        self._attr_unique_id = f'brightness_{brightness_type}-{self._hub_id}'
 
     @property
     def native_max_value(self) -> float:
@@ -85,13 +87,13 @@ class ButtonPlusBrightness(NumberEntity):
 
         match self.event_type:
             case EventType.BRIGHTNESS_LARGE_DISPLAY:
-                name = f"Display Module"
+                name = f"{self._hub_id} Display Module"
                 connections: set[tuple[str, str]] = {("display_module", 1)}
                 model = "Display Module"
                 identifiers = {(DOMAIN, f'{self._hub.hub_id}_large_display_module')}
                 device_info = DeviceInfo(name=name, connections=connections, model=model, identifiers=identifiers, manufacturer=MANUFACTURER, via_device=via_device)
             case EventType.BRIGHTNESS_MINI_DISPLAY:
-                name = f"BAR Module 1"
+                name = f"{self._hub_id} BAR Module 1"
                 #name = f"Brightness Mini Display Module"
                 connections: set[tuple[str, str]] = {
                         #(DOMAIN, f'{self._hub.hub_id}_{self._btn_id}_bar_module_{self._connector.connector_id}')
