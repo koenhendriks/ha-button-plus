@@ -88,14 +88,14 @@ class ButtonPlusBrightness(NumberEntity):
         identifiers: set[tuple[str, str]] = {}
 
         match self.event_type:
-            case EventType.BRIGHTNESS_LARGE_DISPLAY:
+            case EventType.BRIGHTNESS_MINI_DISPLAY:
                 # selects the first module it finds.
                 identifiers = {
                     (DOMAIN, f"{self._hub.hub_id} BAR Module 1"),
                     (DOMAIN, f"{self._hub.hub_id} BAR Module 2"),
                     (DOMAIN, f"{self._hub.hub_id} BAR Module 3")
                 }
-            case EventType.BRIGHTNESS_MINI_DISPLAY:
+            case EventType.BRIGHTNESS_LARGE_DISPLAY:
                 identifiers = {(DOMAIN, f"{self._hub.hub_id} Display Module")}
 
         return DeviceInfo(
