@@ -8,6 +8,7 @@ import traceback
 from json import JSONDecodeError
 
 import voluptuous as vol
+from custom_components.button_plus.button_plus_api.model import ConnectorEnum
 from homeassistant import config_entries, exceptions
 from homeassistant.const import CONF_IP_ADDRESS, CONF_EMAIL, CONF_PASSWORD, CONF_HOST
 from homeassistant.helpers import aiohttp_client
@@ -284,7 +285,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         active_connectors = [
             connector.connector_id
             for connector in device_config.info.connectors
-            if connector.connector_type in [1, 2]
+            if connector.connector_type_enum() in [ConnectorEnum.DISPLAY, ConnectorEnum.BAR]
         ]
 
         for button in filter(lambda b: b.button_id // 2 in active_connectors, device_config.mqtt_buttons):

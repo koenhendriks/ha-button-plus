@@ -9,6 +9,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.components.mqtt import client as mqtt
 from .button_plus_api.event_type import EventType
 from . import ButtonPlusHub
@@ -81,31 +82,26 @@ class ButtonPlusBrightness(NumberEntity):
         _LOGGER.debug(f"Update {self.name} (attr_name: {self._attr_name}) (unique: {self._attr_unique_id})")
 
     @property
-    def device_info(self)-> DeviceInfo:
+    def device_info(self) -> DeviceInfo:
         """Return information to link this entity with the correct device."""
-        via_device = (DOMAIN, self._hub.hub_id)
+
+        identifiers: set[tuple[str, str]] = {}
 
         match self.event_type:
             case EventType.BRIGHTNESS_LARGE_DISPLAY:
-                name = f"{self._hub_id} Display Module"
-                connections: set[tuple[str, str]] = {("display_module", 1)}
-                model = "Display Module"
-                identifiers = {(DOMAIN, f'{self._hub.hub_id}_large_display_module')}
-                device_info = DeviceInfo(name=name, connections=connections, model=model, identifiers=identifiers, manufacturer=MANUFACTURER, via_device=via_device)
+                # selects the first module it finds.
+                identifiers = {
+                    (DOMAIN, f"{self._hub.hub_id} BAR Module 1"),
+                    (DOMAIN, f"{self._hub.hub_id} BAR Module 2"),
+                    (DOMAIN, f"{self._hub.hub_id} BAR Module 3")
+                }
             case EventType.BRIGHTNESS_MINI_DISPLAY:
-                name = f"{self._hub_id} BAR Module 1"
-                #name = f"Brightness Mini Display Module"
-                connections: set[tuple[str, str]] = {
-                        #(DOMAIN, f'{self._hub.hub_id}_{self._btn_id}_bar_module_{self._connector.connector_id}')
-                        ("bar_module", 1),
-                        ("bar_module", 2),
-                        ("bar_module", 3)
-                    }
-                model = "BAR Module"
-                identifiers = {(DOMAIN, f'{self._hub.hub_id}_display_module_mini_brightness')}
-                device_info = DeviceInfo(name=name, connections=connections, model=model, identifiers=identifiers, manufacturer=MANUFACTURER, via_device=via_device)
+                identifiers = {(DOMAIN, f"{self._hub.hub_id} Display Module")}
 
-        return device_info
+        return DeviceInfo(
+            identifiers=identifiers,
+        )
+
 
 
     async def async_set_value(self, value: float) -> None:
