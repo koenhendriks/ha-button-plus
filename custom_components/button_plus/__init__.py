@@ -9,9 +9,9 @@ from homeassistant.helpers.device_registry import DeviceEntry
 
 from custom_components.button_plus.button_plus_api.model import DeviceConfiguration
 from custom_components.button_plus.buttonplushub import ButtonPlusHub
-# from custom_components.button_plus.coordinator import ButtonPlusCoordinator
+from custom_components.button_plus.const import DOMAIN
+from custom_components.button_plus.coordinator import ButtonPlusCoordinator
 
-from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -28,14 +28,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hub = ButtonPlusHub(hass, device_configuration, entry)
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = hub
 
-    # buttonplus_coordinator = ButtonPlusCoordinator(hass, hub)
+    buttonplus_coordinator = ButtonPlusCoordinator(hass, hub)
 
-    # await buttonplus_coordinator.async_config_entry_first_refresh()
+    await buttonplus_coordinator.async_config_entry_first_refresh()
 
     # This creates each HA object for each platform your device requires.
     # It's done by calling the `async_setup_entry` function in each platform module.
-    
-    
+
+
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
 

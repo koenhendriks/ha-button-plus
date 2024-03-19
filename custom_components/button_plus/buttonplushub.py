@@ -4,14 +4,14 @@ from __future__ import annotations
 import json
 import logging
 
+from config.custom_components.button_plus.button_plus_api.local_api_client import LocalApiClient
+from config.custom_components.button_plus.button_plus_api.model import DeviceConfiguration
+from config.custom_components.button_plus.const import DOMAIN, MANUFACTURER
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers import device_registry as dr
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import aiohttp_client
 
-from .button_plus_api.local_api_client import LocalApiClient
-from .button_plus_api.model import ConnectorEnum, DeviceConfiguration
-from .const import DOMAIN, MANUFACTURER
 
 _LOGGER: logging.Logger = logging.getLogger(__package__)
 
@@ -66,7 +66,7 @@ class ButtonPlusHub:
             },
             via_device=(DOMAIN, hub.hub_id)
         )
-        
+
         return device
 
 
@@ -98,14 +98,14 @@ class ButtonPlusHub:
 
 
     @property
-    def client(self): # -> LocalApiClient:
+    def client(self) -> LocalApiClient:
         """Return Button+ API client"""
         return self._client
 
     @property
     def hub_id(self) -> str:
         return self._id
-    
+
     @property
     def name(self) -> str:
         return self._name
