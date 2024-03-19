@@ -1,11 +1,10 @@
 """Button+ connects several devices."""
 from __future__ import annotations
 
-import json
 import logging
 
 from config.custom_components.button_plus.button_plus_api.local_api_client import LocalApiClient
-from config.custom_components.button_plus.button_plus_api.model import DeviceConfiguration
+from config.custom_components.button_plus.button_plus_api.model import ConnectorEnum, DeviceConfiguration
 from config.custom_components.button_plus.const import DOMAIN, MANUFACTURER
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers import device_registry as dr
