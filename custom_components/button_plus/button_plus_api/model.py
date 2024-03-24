@@ -1,11 +1,20 @@
 import json
 from typing import List, Dict, Any
+from enum import Enum
+
+class ConnectorEnum(Enum):
+    NOT_CONNECTED = 0
+    BAR = 1
+    DISPLAY = 2
 
 
 class Connector:
     def __init__(self, connector_id: int, connector_type: int):
         self.connector_id = connector_id
         self.connector_type = connector_type
+
+    def connector_type_enum(self) -> ConnectorEnum:
+        return ConnectorEnum(self.connector_type)
 
     @staticmethod
     def from_dict(data: Dict[str, Any]) -> 'Connector':

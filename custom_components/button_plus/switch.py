@@ -6,6 +6,7 @@ import logging
 from homeassistant.components.switch import (SwitchEntity, SwitchDeviceClass)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from custom_components.button_plus.button_plus_api.model import ConnectorEnum
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from . import ButtonPlusHub
 
@@ -28,7 +29,7 @@ async def async_setup_entry(
     active_connectors = [
         connector.connector_id
         for connector in hub.config.info.connectors
-        if connector.connector_type in [1, 2]
+        if connector.connector_type_enum() in [ConnectorEnum.DISPLAY, ConnectorEnum.BAR]
     ]
 
     buttons = filter(lambda b: b.button_id // 2 in active_connectors,hub.config.mqtt_buttons)
@@ -66,14 +67,14 @@ class ButtonPlusSwitch(SwitchEntity):
             "manufacturer": MANUFACTURER,
         }
 
-        match self._connector.connector_type:
-            case 1:
-                device_info["name"] = f"BAR Module {self._connector.connector_id}"
+        match self._connector.connector_type_enum():
+            case ConnectorEnum.BAR:
+                device_info["name"] = f"{self._hub._name} BAR Module {self._connector.connector_id}"
                 device_info["connections"] = {("bar_module", self._connector.connector_id)}
                 device_info["model"] = "BAR Module"
                 device_info["identifiers"] = {(DOMAIN, f'{self._hub.hub_id}_{self._btn_id}_bar_module_{self._connector.connector_id}')}
-            case 2:
-                device_info["name"] = f"Display Module"
+            case ConnectorEnum.DISPLAY:
+                device_info["name"] = f"{self._hub._name} Display Module"
                 device_info["connections"] = {("display_module", 1)}
                 device_info["model"] = "Display Module"
                 device_info["identifiers"] = {(DOMAIN, f'{self._hub.hub_id}_{self._btn_id}_display_module')}

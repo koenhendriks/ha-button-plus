@@ -3,13 +3,14 @@ from __future__ import annotations
 
 import logging
 
+from custom_components.button_plus.button_plus_api.model import ConnectorEnum
 from homeassistant.components.text import TextEntity
-
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.components.mqtt import client as mqtt
 from homeassistant.helpers import template
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.device_registry import DeviceInfo
 
 from custom_components.button_plus.button_plus_api.model import Connector
 
@@ -33,7 +34,7 @@ async def async_setup_entry(
     active_connectors = [
         connector.connector_id
         for connector in hub.config.info.connectors
-        if connector.connector_type in [1, 2]
+        if connector.connector_type_enum() in [ConnectorEnum.DISPLAY, ConnectorEnum.BAR]
     ]
 
     buttons = filter(lambda b: b.button_id // 2 in active_connectors, hub.config.mqtt_buttons)
@@ -67,11 +68,10 @@ class ButtonPlusText(TextEntity):
         self.unique_id = self.unique_id_gen()
 
     def unique_id_gen(self):
-
-        match self._connector.connector_type:
-            case 1:
+        match self._connector.connector_type_enum():
+            case ConnectorEnum.BAR:
                 return self.unique_id_gen_bar()
-            case 2:
+            case ConnectorEnum.DISPLAY:
                 return self.unique_id_gen_display()
 
     def unique_id_gen_bar(self):
@@ -91,27 +91,20 @@ class ButtonPlusText(TextEntity):
         _LOGGER.debug(f"Update {self.name} (attr_name: {self._attr_name}) (unique: {self._attr_unique_id})")
 
     @property
-    def device_info(self):
+    def device_info(self) -> DeviceInfo:
         """Return information to link this entity with the correct device."""
-        device_info = {
-            "via_device": (DOMAIN, self._hub.hub_id),
-            "manufacturer": MANUFACTURER,
-            "identifiers" : {(DOMAIN, self.unique_id)}
-        }
 
-        match self._connector.connector_type:
-            case 1:
-                device_info["name"] = f"{self._hub_id} BAR Module {self._connector.connector_id}"
-                device_info["connections"] = {("bar_module", self._connector.connector_id)}
-                device_info["model"] = "BAR Module"
-                # device_info["identifiers"] = {(DOMAIN, f'{self._hub.hub_id}_{self._btn_id}_bar_module_{self._connector.connector_id}')}
-            case 2:
-                device_info["name"] = f"{self._hub_id} Display Module"
-                device_info["connections"] = {("display_module", 1)}
-                device_info["model"] = "Display Module"
-                # device_info["identifiers"] = {(DOMAIN, f'{self._hub.hub_id}_{self._btn_id}_display_module')}
+        identifiers: set[tuple[str, str]] = {}
 
-        return device_info
+        match self._connector.connector_type_enum():
+            case ConnectorEnum.BAR:
+                identifiers = {(DOMAIN, f"{self._hub.hub_id} BAR Module {self._connector.connector_id}")}
+            case ConnectorEnum.DISPLAY:
+                identifiers = {(DOMAIN, f"{self._hub.hub_id} Display Module")}
+
+        return DeviceInfo(
+            identifiers=identifiers,
+        )
 
     async def async_set_value(self, value: str) -> None:
         """Set the text value and publish to mqtt."""
