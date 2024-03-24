@@ -60,11 +60,29 @@ class Info:
             sensors=[Sensor.from_dict(sensor) for sensor in data['sensors']]
         )
 
+class Topic:
+    def __init__(self, broker_id: str, topic: str, payload: str, event_type: int):
+        self.broker_id = broker_id
+        self.topic = topic
+        self.payload = payload
+        self.event_type = event_type
+
+    def connector_type_enum(self) -> EventType:
+        return EventType(self.event_type)
+
+    @staticmethod
+    def from_dict(data: Dict[str, Any]) -> 'Topic':
+        return Topic(
+            broker_id=data['brokerid'],
+            topic=data['topic'],
+            payload=data['payload'],
+            event_type=data['eventtype']
+        )
 
 class Core:
     def __init__(self, name: str, location: str, auto_backup: bool, brightness_large_display: int,
                  brightness_mini_display: int, led_color_front: int, led_color_wall: int, color: int,
-                 topics: List[Dict[str, Any]]):
+                 topics: List[Topic]):
         self.name = name
         self.location = location
         self.auto_backup = auto_backup
@@ -86,13 +104,13 @@ class Core:
             led_color_front=data['ledcolorfront'],
             led_color_wall=data['ledcolorwall'],
             color=data['color'],
-            topics=data['topics']
+            topics=[Topic.from_dict(topic) for topic in data.get('topics', [])]
         )
 
 
 class MqttButton:
     def __init__(self, button_id: int, label: str, top_label: str, led_color_front: int, led_color_wall: int,
-                 long_delay: int, long_repeat: int, topics: List[Dict[str, Any]]):
+                 long_delay: int, long_repeat: int, topics: List[Topic]):
         self.button_id = button_id
         self.label = label
         self.top_label = top_label
@@ -112,28 +130,7 @@ class MqttButton:
             led_color_wall=data['ledcolorwall'],
             long_delay=data['longdelay'],
             long_repeat=data['longrepeat'],
-            topics=data['topics']
-        )
-
-    def for_button(self) -> int:
-        # Note: this is positional. This assumes that there are 4 modules
-        return self.button_id // 2
-
-
-class Topic:
-    def __init__(self, broker_id: str, topic: str, payload: str, event_type: int):
-        self.broker_id = broker_id
-        self.topic = topic
-        self.payload = payload
-        self.event_type = event_type
-
-    @staticmethod
-    def from_dict(data: Dict[str, Any]) -> 'Topic':
-        return Topic(
-            broker_id=data['brokerid'],
-            topic=data['topic'],
-            payload=data['payload'],
-            event_type=data['eventtype']
+            topics=[Topic.from_dict(topic) for topic in data.get('topics', [])]
         )
 
 
@@ -161,7 +158,7 @@ class MqttDisplay:
             label=data['label'],
             unit=data['unit'],
             round=data['round'],
-            topics=[Topic.from_dict(topic) for topic in data['topics']]
+            topics=[Topic.from_dict(topic) for topic in data.get('topics', [])]
         )
 
 
