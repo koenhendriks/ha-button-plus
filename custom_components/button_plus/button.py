@@ -7,8 +7,9 @@ from homeassistant.components.button import ButtonEntity, ButtonDeviceClass
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.device_registry import DeviceInfo
 
-from custom_components.button_plus.button_plus_api.model import Connector
+from custom_components.button_plus.button_plus_api.model import Connector, ConnectorEnum
 from . import ButtonPlusHub
 
 from .const import DOMAIN, MANUFACTURER
@@ -30,7 +31,7 @@ async def async_setup_entry(
     active_connectors = active_connectors = [
         connector.connector_id
         for connector in hub.config.info.connectors
-        if connector.connector_type in [1, 2]
+        if connector.connector_type_enum() in [ConnectorEnum.DISPLAY, ConnectorEnum.BAR]
     ]
 
     buttons = filter(lambda b: b.button_id // 2 in active_connectors, hub.config.mqtt_buttons)
@@ -58,11 +59,10 @@ class ButtonPlusButton(ButtonEntity):
         self.unique_id = self.unique_id_gen()
 
     def unique_id_gen(self):
-
-        match self._connector.connector_type:
-            case 1:
+        match self._connector.connector_type_enum():
+            case ConnectorEnum.BAR:
                 return self.unique_id_gen_bar()
-            case 2:
+            case ConnectorEnum.DISPLAY:
                 return self.unique_id_gen_display()
 
     def unique_id_gen_bar(self):
@@ -81,25 +81,20 @@ class ButtonPlusButton(ButtonEntity):
         return False
 
     @property
-    def device_info(self):
+    def device_info(self) -> DeviceInfo:
         """Return information to link this entity with the correct device."""
-        device_info = {
-            "via_device": (DOMAIN, self._hub.hub_id),
-            "manufacturer": MANUFACTURER,
-            "identifiers" : {(DOMAIN, self.unique_id)}
-        }
 
-        match self._connector.connector_type:
-            case 1:
-                device_info["name"] = f"{self._hub_id} BAR Module {self._connector.connector_id}"
-                device_info["connections"] = {("bar_module", self._connector.connector_id)}
-                device_info["model"] = "BAR Module"
-            case 2:
-                device_info["name"] = f"{self._hub_id} Display Module"
-                device_info["connections"] = {("display_module", 1)}
-                device_info["model"] = "Display Module"
+        identifiers: set[tuple[str, str]] = {}
 
-        return device_info
+        match self._connector.connector_type_enum():
+            case ConnectorEnum.BAR:
+                identifiers = {(DOMAIN, f"{self._hub.hub_id} BAR Module {self._connector.connector_id}")}
+            case ConnectorEnum.DISPLAY:
+                identifiers = {(DOMAIN, f"{self._hub.hub_id} Display Module")}
+
+        return DeviceInfo(
+            identifiers=identifiers,
+        )
 
     async def async_press(self) -> None:
         """Handle the button press."""
