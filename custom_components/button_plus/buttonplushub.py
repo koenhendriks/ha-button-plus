@@ -3,13 +3,14 @@ from __future__ import annotations
 
 import logging
 
-from config.custom_components.button_plus.button_plus_api.local_api_client import LocalApiClient
-from config.custom_components.button_plus.button_plus_api.model import ConnectorEnum, DeviceConfiguration
-from config.custom_components.button_plus.const import DOMAIN, MANUFACTURER
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers import device_registry as dr
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import aiohttp_client
+
+from .button_plus_api.local_api_client import LocalApiClient
+from .button_plus_api.model import ConnectorEnum, DeviceConfiguration
+from .const import DOMAIN, MANUFACTURER
 
 
 _LOGGER: logging.Logger = logging.getLogger(__package__)

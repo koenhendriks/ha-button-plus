@@ -1,14 +1,8 @@
 import json
 from typing import List, Dict, Any
-from enum import Enum
 
-class ConnectorEnum(Enum):
-    NOT_CONNECTED = 0
-    BAR = 1
-    DISPLAY = 2
-
-from custom_components.button_plus.button_plus_api.event_type import EventType
-
+from .connector_type import ConnectorEnum
+from .event_type import EventType
 
 class Connector:
     def __init__(self, connector_id: int, connector_type: int):

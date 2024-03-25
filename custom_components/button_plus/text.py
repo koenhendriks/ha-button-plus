@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import logging
 
-from custom_components.button_plus.button_plus_api.model import ConnectorEnum
 from homeassistant.components.text import TextEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -12,11 +11,9 @@ from homeassistant.helpers import template
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.device_registry import DeviceInfo
 
-from custom_components.button_plus.button_plus_api.model import Connector
-
 from . import ButtonPlusHub
-
-from .const import DOMAIN, MANUFACTURER
+from .button_plus_api.model import ConnectorEnum
+from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
