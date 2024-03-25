@@ -9,10 +9,9 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.device_registry import DeviceInfo
 
-from custom_components.button_plus.button_plus_api.model import Connector, ConnectorEnum
+from .button_plus_api.model import Connector, ConnectorEnum
+from .const import DOMAIN
 from . import ButtonPlusHub
-
-from .const import DOMAIN, MANUFACTURER
 
 _LOGGER = logging.getLogger(__name__)
 

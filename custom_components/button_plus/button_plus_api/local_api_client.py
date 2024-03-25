@@ -2,8 +2,6 @@ from __future__ import annotations
 
 import logging
 
-import aiohttp
-
 _LOGGER: logging.Logger = logging.getLogger(__package__)
 
 
@@ -14,7 +12,7 @@ class LocalApiClient:
         self._base = f"http://{ip_address}"
         self._session = session
 
-        _LOGGER.debug(f"Initialize Button+ local API client")
+        _LOGGER.debug("Initialize Button+ local API client")
 
     async def fetch_config(self):
         url = f"{self._base}/config"

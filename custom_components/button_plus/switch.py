@@ -6,8 +6,9 @@ import logging
 from homeassistant.components.switch import (SwitchEntity, SwitchDeviceClass)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from custom_components.button_plus.button_plus_api.model import ConnectorEnum
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+
+from .button_plus_api.model import ConnectorEnum
 from . import ButtonPlusHub
 
 from .const import DOMAIN, MANUFACTURER
