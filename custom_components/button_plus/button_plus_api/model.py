@@ -7,6 +7,8 @@ class ConnectorEnum(Enum):
     BAR = 1
     DISPLAY = 2
 
+from custom_components.button_plus.button_plus_api.event_type import EventType
+
 
 class Connector:
     def __init__(self, connector_id: int, connector_type: int):
