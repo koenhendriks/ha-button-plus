@@ -7,8 +7,8 @@ from homeassistant.components.number import NumberEntity
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.components.mqtt import client as mqtt, ReceiveMessage
 
-from custom_components.button_plus.buttonplushub import ButtonPlusHub
-from custom_components.button_plus.const import DOMAIN
+from .buttonplushub import ButtonPlusHub
+from .const import DOMAIN
 
 
 _LOGGER = logging.getLogger(__name__)

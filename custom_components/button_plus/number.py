@@ -2,43 +2,38 @@
 from __future__ import annotations
 
 import logging
-from typing import Any
 
 from homeassistant.components.number import NumberEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.components.mqtt import client as mqtt
+from packaging import version
 from .button_plus_api.event_type import EventType
 from . import ButtonPlusHub
-from packaging import version
 
-from .const import DOMAIN, MANUFACTURER
+from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
-
-
 
 async def async_setup_entry(
         hass: HomeAssistant,
         config_entry: ConfigEntry,
         async_add_entities: AddEntitiesCallback,
 ) -> None:
+    """Add switches for passed config_entry in HA."""
 
     brightness = []
 
-    """Add switches for passed config_entry in HA."""
-
     hub: ButtonPlusHub = hass.data[DOMAIN][config_entry.entry_id]
 
-    if version.parse(hub.config.info.firmware) < version.parse('1.11'):
+    min_version = '1.11'
+    if version.parse(hub.config.info.firmware) < version.parse(min_version):
         _LOGGER.info(f"Current version {hub.config.info.firmware} doesn't support the brightness, it must be at least firmware version {min_version}")
         return
 
     _LOGGER.debug(f"Creating number with parameters: {hub.hub_id}")
-    # _LOGGER.debug(f"Creating Lights with parameters: {button.button_id} {button.label} {hub.hub_id}")
     mini = ButtonPlusMiniBrightness(hub)
     brightness.append(mini)
     hub.add_brightness("mini", mini)
@@ -106,7 +101,6 @@ class ButtonPlusBrightness(NumberEntity):
 
     async def async_set_value(self, value: float) -> None:
         """Set the text value and publish to mqtt."""
-        # TODO: Add support for mini
         label_topic = f"buttonplus/{self._hub_id}/brightness/{self._brightness_type}"
         _LOGGER.debug(f"ButtonPlus brightness update for {self.entity_id}")
         _LOGGER.debug(f"ButtonPlus brightness update to {label_topic} with new value: {value}")
@@ -124,7 +118,7 @@ class ButtonPlusMiniBrightness(ButtonPlusBrightness):
     @property
     def name(self) -> str:
         """Return the display name of this light."""
-        return f'Brightness mini display'
+        return 'Brightness mini display'
 
 
 class ButtonPlusLargeBrightness(ButtonPlusBrightness):
@@ -136,4 +130,4 @@ class ButtonPlusLargeBrightness(ButtonPlusBrightness):
     @property
     def name(self) -> str:
         """Return the display name of this light."""
-        return f'Brightness large display'
+        return 'Brightness large display'
