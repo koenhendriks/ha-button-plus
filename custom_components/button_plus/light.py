@@ -1,4 +1,5 @@
-""" Platform for light integration. """
+"""Platform for light integration."""
+
 from __future__ import annotations
 
 import logging
@@ -18,9 +19,9 @@ lights = []
 
 
 async def async_setup_entry(
-        hass: HomeAssistant,
-        config_entry: ConfigEntry,
-        async_add_entities: AddEntitiesCallback,
+    hass: HomeAssistant,
+    config_entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Add switches for passed config_entry in HA."""
 
@@ -41,9 +42,9 @@ class ButtonPlusLight(LightEntity):
         self._hub = hub
         self._hub_id = hub.hub_id
         self._light_type = light_type
-        self._attr_unique_id = f'light-{light_type}-{self._hub_id}-{btn_id}'
+        self._attr_unique_id = f"light-{light_type}-{self._hub_id}-{btn_id}"
         self.entity_id = f"light.{light_type}_{self._hub_id}_{btn_id}"
-        self._attr_name = f'light-{light_type}-{btn_id}'
+        self._attr_name = f"light-{light_type}-{btn_id}"
         self._state = False
         self._connector = hub.config.info.connectors[btn_id // 2]
 
@@ -54,20 +55,26 @@ class ButtonPlusLight(LightEntity):
         return self._state
 
     async def async_turn_on(self, **kwargs: Any) -> None:
-        """Instruct the light to turn on. """
+        """Instruct the light to turn on."""
         # Need to apply mqtt logic here to turn on led
-        _LOGGER.debug(f"Turn on {self.name} (attr_name: {self._attr_name}) (unique: {self._attr_unique_id})")
+        _LOGGER.debug(
+            f"Turn on {self.name} (attr_name: {self._attr_name}) (unique: {self._attr_unique_id})"
+        )
 
     async def async_turn_off(self, **kwargs: Any) -> None:
         """Instruct the light to turn off."""
         # Need to apply mqtt logic here to turn off led
-        _LOGGER.debug(f"Turn off {self.name} (attr_name: {self._attr_name}) (unique: {self._attr_unique_id})")
+        _LOGGER.debug(
+            f"Turn off {self.name} (attr_name: {self._attr_name}) (unique: {self._attr_unique_id})"
+        )
 
     def update(self) -> None:
         """Fetch new state data for this light."""
         # get latest stats from mqtt for this light
         # then update self._state
-        _LOGGER.debug(f"Update {self.name} (attr_name: {self._attr_name}) (unique: {self._attr_unique_id})")
+        _LOGGER.debug(
+            f"Update {self.name} (attr_name: {self._attr_name}) (unique: {self._attr_unique_id})"
+        )
 
     @property
     def device_info(self):
@@ -80,20 +87,29 @@ class ButtonPlusLight(LightEntity):
         match self._connector.connector_type:
             case 1:
                 device_info["name"] = f"BAR Module {self._connector.connector_id}"
-                device_info["connections"] = {("bar_module", self._connector.connector_id)}
+                device_info["connections"] = {
+                    ("bar_module", self._connector.connector_id)
+                }
                 device_info["model"] = "BAR Module"
-                device_info["identifiers"] = {(DOMAIN, f'{self._hub.hub_id}_{self._btn_id}_bar_module_{self._connector.connector_id}')}
+                device_info["identifiers"] = {
+                    (
+                        DOMAIN,
+                        f"{self._hub.hub_id}_{self._btn_id}_bar_module_{self._connector.connector_id}",
+                    )
+                }
             case 2:
                 device_info["name"] = f"Display Module"
                 device_info["connections"] = {("display_module", 1)}
                 device_info["model"] = "Display Module"
-                device_info["identifiers"] = {(DOMAIN, f'{self._hub.hub_id}_{self._btn_id}_display_module')}
+                device_info["identifiers"] = {
+                    (DOMAIN, f"{self._hub.hub_id}_{self._btn_id}_display_module")
+                }
 
         return device_info
 
 
 class ButtonPlusWallLight(ButtonPlusLight):
-    """ Wall light entity representation """
+    """Wall light entity representation"""
 
     def __init__(self, btn_id: int, hub: ButtonPlusHub):
         super().__init__(btn_id, hub, "wall")
@@ -101,11 +117,11 @@ class ButtonPlusWallLight(ButtonPlusLight):
     @property
     def name(self) -> str:
         """Return the display name of this light."""
-        return f'LED Wall {self._btn_id}'
+        return f"LED Wall {self._btn_id}"
 
 
 class ButtonPlusFrontLight(ButtonPlusLight):
-    """ Wall light entity representation """
+    """Wall light entity representation"""
 
     def __init__(self, btn_id: int, hub: ButtonPlusHub):
         super().__init__(btn_id, hub, "front")
@@ -113,4 +129,4 @@ class ButtonPlusFrontLight(ButtonPlusLight):
     @property
     def name(self) -> str:
         """Return the display name of this light."""
-        return f'LED Front {self._btn_id}'
+        return f"LED Front {self._btn_id}"

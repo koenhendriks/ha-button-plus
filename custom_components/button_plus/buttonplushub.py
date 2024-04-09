@@ -1,4 +1,5 @@
 """Button+ connects several devices."""
+
 from __future__ import annotations
 
 import logging
@@ -19,13 +20,17 @@ _LOGGER: logging.Logger = logging.getLogger(__package__)
 class ButtonPlusHub:
     """hub for Button+."""
 
-    def __init__(self, hass: HomeAssistant, config: DeviceConfiguration, entry: ConfigEntry) -> None:
+    def __init__(
+        self, hass: HomeAssistant, config: DeviceConfiguration, entry: ConfigEntry
+    ) -> None:
         _LOGGER.debug(f"New hub with config {config.core}")
         self._hass = hass
         self.config = config
         self._name = config.core.name or config.info.device_id
         self._id = config.info.device_id
-        self._client = LocalApiClient(config.info.ip_address, aiohttp_client.async_get_clientsession(hass))
+        self._client = LocalApiClient(
+            config.info.ip_address, aiohttp_client.async_get_clientsession(hass)
+        )
         self.online = True
         self.button_entities = {}
         self.label_entities = {}
@@ -43,14 +48,25 @@ class ButtonPlusHub:
             suggested_area=self.config.core.location,
             name=self._name,
             model="Base Module",
-            sw_version=config.info.firmware
+            sw_version=config.info.firmware,
         )
 
         # 1 or none display module
-        self.display_module = next((self.create_display_module(hass, entry, self) for _ in self.connector(ConnectorEnum.DISPLAY)), None)
-        self.display_bar = [(connector_id, self.create_bar_module(hass, entry, self, connector_id)) for connector_id in self.connector(ConnectorEnum.BAR)]
+        self.display_module = next(
+            (
+                self.create_display_module(hass, entry, self)
+                for _ in self.connector(ConnectorEnum.DISPLAY)
+            ),
+            None,
+        )
+        self.display_bar = [
+            (connector_id, self.create_bar_module(hass, entry, self, connector_id))
+            for connector_id in self.connector(ConnectorEnum.BAR)
+        ]
 
-    def create_display_module(self, hass: HomeAssistant, entry: ConfigEntry, hub: ButtonPlusHub) -> None:
+    def create_display_module(
+        self, hass: HomeAssistant, entry: ConfigEntry, hub: ButtonPlusHub
+    ) -> None:
         _LOGGER.debug(f"Add display module from '{hub.hub_id}'")
         device_registry = dr.async_get(hass)
 
@@ -61,17 +77,22 @@ class ButtonPlusHub:
             model="Display Module",
             manufacturer=MANUFACTURER,
             suggested_area=hub.config.core.location,
-            identifiers={
-                (DOMAIN, f"{hub.hub_id} Display Module")
-            },
-            via_device=(DOMAIN, hub.hub_id)
+            identifiers={(DOMAIN, f"{hub.hub_id} Display Module")},
+            via_device=(DOMAIN, hub.hub_id),
         )
 
         return device
 
-
-    def create_bar_module(self, hass: HomeAssistant, entry: ConfigEntry, hub: ButtonPlusHub, connector_id: int) -> None:
-        _LOGGER.debug(f"Add bar module from '{hub.hub_id}' with connector '{connector_id}'")
+    def create_bar_module(
+        self,
+        hass: HomeAssistant,
+        entry: ConfigEntry,
+        hub: ButtonPlusHub,
+        connector_id: int,
+    ) -> None:
+        _LOGGER.debug(
+            f"Add bar module from '{hub.hub_id}' with connector '{connector_id}'"
+        )
         device_registry = dr.async_get(hass)
 
         device = device_registry.async_get_or_create(
@@ -81,10 +102,8 @@ class ButtonPlusHub:
             model="Bar module",
             manufacturer=MANUFACTURER,
             suggested_area=hub.config.core.location,
-            identifiers={
-                (DOMAIN, f"{hub.hub_id} BAR Module {connector_id}")
-            },
-            via_device=(DOMAIN, hub.hub_id)
+            identifiers={(DOMAIN, f"{hub.hub_id} BAR Module {connector_id}")},
+            via_device=(DOMAIN, hub.hub_id),
         )
 
         return device
@@ -95,7 +114,6 @@ class ButtonPlusHub:
             for connector in self.config.info.connectors
             if connector.connector_type_enum() in [connector_type]
         ]
-
 
     @property
     def client(self) -> LocalApiClient:
@@ -121,4 +139,3 @@ class ButtonPlusHub:
 
     def add_brightness(self, identifier, entity):
         self.brightness_entities[identifier] = entity
-

@@ -1,4 +1,5 @@
 """The Button+ integration."""
+
 from __future__ import annotations
 
 import logging
@@ -23,7 +24,9 @@ PLATFORMS: list[str] = ["button", "text", "number"]
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Button+ from a config entry."""
     _LOGGER.debug(f"Button+ init got new device entry! {entry.entry_id.title}")
-    device_configuration: DeviceConfiguration = DeviceConfiguration.from_json(entry.data.get("config"))
+    device_configuration: DeviceConfiguration = DeviceConfiguration.from_json(
+        entry.data.get("config")
+    )
 
     hub = ButtonPlusHub(hass, device_configuration, entry)
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = hub
@@ -35,9 +38,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # This creates each HA object for each platform your device requires.
     # It's done by calling the `async_setup_entry` function in each platform module.
 
-
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
+
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""

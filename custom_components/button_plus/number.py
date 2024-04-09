@@ -1,4 +1,5 @@
-""" Platform for light integration. """
+"""Platform for light integration."""
+
 from __future__ import annotations
 
 import logging
@@ -17,10 +18,11 @@ from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
+
 async def async_setup_entry(
-        hass: HomeAssistant,
-        config_entry: ConfigEntry,
-        async_add_entities: AddEntitiesCallback,
+    hass: HomeAssistant,
+    config_entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Add switches for passed config_entry in HA."""
 
@@ -28,9 +30,11 @@ async def async_setup_entry(
 
     hub: ButtonPlusHub = hass.data[DOMAIN][config_entry.entry_id]
 
-    min_version = '1.11'
+    min_version = "1.11"
     if version.parse(hub.config.info.firmware) < version.parse(min_version):
-        _LOGGER.info(f"Current version {hub.config.info.firmware} doesn't support the brightness, it must be at least firmware version {min_version}")
+        _LOGGER.info(
+            f"Current version {hub.config.info.firmware} doesn't support the brightness, it must be at least firmware version {min_version}"
+        )
         return
 
     _LOGGER.debug(f"Creating number with parameters: {hub.hub_id}")
@@ -45,18 +49,17 @@ async def async_setup_entry(
     async_add_entities(brightness)
 
 
-
 class ButtonPlusBrightness(NumberEntity):
     def __init__(self, hub: ButtonPlusHub, brightness_type: str, event_type: EventType):
         self._hub = hub
         self._hub_id = hub.hub_id
         self._brightness_type = brightness_type
         self.entity_id = f"brightness.{brightness_type}_{self._hub_id}"
-        self._attr_name = f'brightness-{brightness_type}'
+        self._attr_name = f"brightness-{brightness_type}"
         self.event_type = event_type
         self._topics = hub.config.core.topics
         self._attr_icon = "mdi:television-ambient-light"
-        self._attr_unique_id = f'brightness_{brightness_type}-{self._hub_id}'
+        self._attr_unique_id = f"brightness_{brightness_type}-{self._hub_id}"
 
     @property
     def native_max_value(self) -> float:
@@ -74,7 +77,9 @@ class ButtonPlusBrightness(NumberEntity):
         """Fetch new state data for this light."""
         # get latest stats from mqtt for this light
         # then update self._state
-        _LOGGER.debug(f"Update {self.name} (attr_name: {self._attr_name}) (unique: {self._attr_unique_id})")
+        _LOGGER.debug(
+            f"Update {self.name} (attr_name: {self._attr_name}) (unique: {self._attr_unique_id})"
+        )
 
     @property
     def device_info(self) -> DeviceInfo:
@@ -88,7 +93,7 @@ class ButtonPlusBrightness(NumberEntity):
                 identifiers = {
                     (DOMAIN, f"{self._hub.hub_id} BAR Module 1"),
                     (DOMAIN, f"{self._hub.hub_id} BAR Module 2"),
-                    (DOMAIN, f"{self._hub.hub_id} BAR Module 3")
+                    (DOMAIN, f"{self._hub.hub_id} BAR Module 3"),
                 }
             case EventType.BRIGHTNESS_LARGE_DISPLAY:
                 identifiers = {(DOMAIN, f"{self._hub.hub_id} Display Module")}
@@ -97,20 +102,22 @@ class ButtonPlusBrightness(NumberEntity):
             identifiers=identifiers,
         )
 
-
-
     async def async_set_value(self, value: float) -> None:
         """Set the text value and publish to mqtt."""
         label_topic = f"buttonplus/{self._hub_id}/brightness/{self._brightness_type}"
         _LOGGER.debug(f"ButtonPlus brightness update for {self.entity_id}")
-        _LOGGER.debug(f"ButtonPlus brightness update to {label_topic} with new value: {value}")
-        await mqtt.async_publish(hass=self.hass, topic=label_topic, payload=value, qos=0, retain=True)
+        _LOGGER.debug(
+            f"ButtonPlus brightness update to {label_topic} with new value: {value}"
+        )
+        await mqtt.async_publish(
+            hass=self.hass, topic=label_topic, payload=value, qos=0, retain=True
+        )
         self._attr_native_value = value
         self.async_write_ha_state()
 
 
 class ButtonPlusMiniBrightness(ButtonPlusBrightness):
-    """ Numeric entity representation """
+    """Numeric entity representation"""
 
     def __init__(self, hub: ButtonPlusHub):
         super().__init__(hub, "mini", EventType.BRIGHTNESS_MINI_DISPLAY)
@@ -118,11 +125,11 @@ class ButtonPlusMiniBrightness(ButtonPlusBrightness):
     @property
     def name(self) -> str:
         """Return the display name of this light."""
-        return 'Brightness mini display'
+        return "Brightness mini display"
 
 
 class ButtonPlusLargeBrightness(ButtonPlusBrightness):
-    """ Numeric entity representation """
+    """Numeric entity representation"""
 
     def __init__(self, hub: ButtonPlusHub):
         super().__init__(hub, "large", EventType.BRIGHTNESS_LARGE_DISPLAY)
@@ -130,4 +137,4 @@ class ButtonPlusLargeBrightness(ButtonPlusBrightness):
     @property
     def name(self) -> str:
         """Return the display name of this light."""
-        return 'Brightness large display'
+        return "Brightness large display"
