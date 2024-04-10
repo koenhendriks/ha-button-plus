@@ -1,1 +1,1 @@
-""" Initialize Button+ Api module """
+"""Initialize Button+ Api module"""

@@ -6,7 +6,7 @@ _LOGGER: logging.Logger = logging.getLogger(__package__)
 
 
 class LocalApiClient:
-    """ Client to talk to Button+ local devices """
+    """Client to talk to Button+ local devices"""
 
     def __init__(self, ip_address, session) -> None:
         self._base = f"http://{ip_address}"
@@ -25,4 +25,3 @@ class LocalApiClient:
         _LOGGER.debug(f"push_config {url}")
         async with self._session.post(url, data=config.to_json()) as response:
             return await response.text()
-

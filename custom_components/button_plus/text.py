@@ -1,7 +1,9 @@
-""" Platform for text integration. """
+"""Platform for text integration."""
+
 from __future__ import annotations
 
 import logging
+from typing import Any
 
 from homeassistant.components.text import TextEntity
 from homeassistant.config_entries import ConfigEntry
@@ -19,9 +21,9 @@ _LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_entry(
-        hass: HomeAssistant,
-        config_entry: ConfigEntry,
-        async_add_entities: AddEntitiesCallback,
+    hass: HomeAssistant,
+    config_entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Add text entity for each top and main label from config_entry in HA."""
 
@@ -34,11 +36,14 @@ async def async_setup_entry(
         if connector.connector_type_enum() in [ConnectorEnum.DISPLAY, ConnectorEnum.BAR]
     ]
 
-    buttons = filter(lambda b: b.button_id // 2 in active_connectors, hub.config.mqtt_buttons)
+    buttons = filter(
+        lambda b: b.button_id // 2 in active_connectors, hub.config.mqtt_buttons
+    )
 
     for button in buttons:
         _LOGGER.debug(
-            f"Creating Texts with parameters: {button.button_id} {button.top_label} {button.label} {hub.hub_id}")
+            f"Creating Texts with parameters: {button.button_id} {button.top_label} {button.label} {hub.hub_id}"
+        )
 
         label_entity = ButtonPlusLabel(button.button_id, hub, button.label)
         top_label_entity = ButtonPlusTopLabel(button.button_id, hub, button.top_label)
@@ -59,7 +64,7 @@ class ButtonPlusText(TextEntity):
         self._hub_id = hub.hub_id
         self._text_type = text_type
         self.entity_id = f"text.{text_type}_{self._hub_id}_{btn_id}"
-        self._attr_name = f'text-{text_type}-{btn_id}'
+        self._attr_name = f"text-{text_type}-{btn_id}"
         self._attr_native_value = btn_label
         self._connector = hub.config.info.connectors[btn_id // 2]
         self.unique_id = self.unique_id_gen()
@@ -72,10 +77,10 @@ class ButtonPlusText(TextEntity):
                 return self.unique_id_gen_display()
 
     def unique_id_gen_bar(self):
-        return f'text_{self._hub_id}_{self._btn_id}_bar_module_{self._connector.connector_id}_{self._text_type}'
+        return f"text_{self._hub_id}_{self._btn_id}_bar_module_{self._connector.connector_id}_{self._text_type}"
 
     def unique_id_gen_display(self):
-        return f'text_{self._hub_id}_{self._btn_id}_display_module_{self._text_type}'
+        return f"text_{self._hub_id}_{self._btn_id}_display_module_{self._text_type}"
 
     @property
     def should_poll(self) -> bool:
@@ -85,7 +90,9 @@ class ButtonPlusText(TextEntity):
         """Fetch new state data for this label."""
         # get latest stats from mqtt for this label
         # then update self._state
-        _LOGGER.debug(f"Update {self.name} (attr_name: {self._attr_name}) (unique: {self._attr_unique_id})")
+        _LOGGER.debug(
+            f"Update {self.name} (attr_name: {self._attr_name}) (unique: {self._attr_unique_id})"
+        )
 
     @property
     def device_info(self) -> DeviceInfo:
@@ -95,7 +102,12 @@ class ButtonPlusText(TextEntity):
 
         match self._connector.connector_type_enum():
             case ConnectorEnum.BAR:
-                identifiers = {(DOMAIN, f"{self._hub.hub_id} BAR Module {self._connector.connector_id}")}
+                identifiers = {
+                    (
+                        DOMAIN,
+                        f"{self._hub.hub_id} BAR Module {self._connector.connector_id}",
+                    )
+                }
             case ConnectorEnum.DISPLAY:
                 identifiers = {(DOMAIN, f"{self._hub.hub_id} Display Module")}
 
@@ -105,18 +117,26 @@ class ButtonPlusText(TextEntity):
 
     async def async_set_value(self, value: str) -> None:
         """Set the text value and publish to mqtt."""
-        parse_value: Any = template.Template(value, self.hass).async_render(parse_result=False)
+        parse_value: Any = template.Template(value, self.hass).async_render(
+            parse_result=False
+        )
 
-        label_topic = f"buttonplus/{self._hub_id}/button/{self._btn_id}/{self._text_type}"
+        label_topic = (
+            f"buttonplus/{self._hub_id}/button/{self._btn_id}/{self._text_type}"
+        )
         _LOGGER.debug(f"ButtonPlus label update for {self.entity_id}")
-        _LOGGER.debug(f"ButtonPlus label update to {label_topic} with new value: {parse_value}")
-        await mqtt.async_publish(hass=self.hass, topic=label_topic, payload=parse_value, qos=0, retain=True)
+        _LOGGER.debug(
+            f"ButtonPlus label update to {label_topic} with new value: {parse_value}"
+        )
+        await mqtt.async_publish(
+            hass=self.hass, topic=label_topic, payload=parse_value, qos=0, retain=True
+        )
         self._attr_native_value = parse_value
         self.async_write_ha_state()
 
 
 class ButtonPlusLabel(ButtonPlusText):
-    """ Wall label entity representation """
+    """Wall label entity representation"""
 
     def __init__(self, btn_id: int, hub: ButtonPlusHub, label: str):
         super().__init__(btn_id, hub, label, "label")
@@ -124,11 +144,11 @@ class ButtonPlusLabel(ButtonPlusText):
     @property
     def name(self) -> str:
         """Return the display name of this label."""
-        return f'Label {self._btn_id}'
+        return f"Label {self._btn_id}"
 
 
 class ButtonPlusTopLabel(ButtonPlusText):
-    """ Wall label entity representation """
+    """Wall label entity representation"""
 
     def __init__(self, btn_id: int, hub: ButtonPlusHub, label: str):
         super().__init__(btn_id, hub, label, "top_label")
@@ -136,4 +156,4 @@ class ButtonPlusTopLabel(ButtonPlusText):
     @property
     def name(self) -> str:
         """Return the display name of this label."""
-        return f'Top Label {self._btn_id}'
+        return f"Top Label {self._btn_id}"

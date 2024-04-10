@@ -8,7 +8,7 @@ _LOGGER: logging.Logger = logging.getLogger(__package__)
 
 
 class ApiClient:
-    """ Client to talk to Button+ website """
+    """Client to talk to Button+ website"""
 
     def __init__(self, session, cookie=None) -> None:
         _LOGGER.debug(f"DEBUG CONFIG {cookie}")
@@ -20,14 +20,14 @@ class ApiClient:
 
         self._cookie = cookie
         self._headers = {
-            'authority': 'api.button.plus',
-            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-            'accept-language': 'en-NL,en-US;q=0.9,en;q=0.8,nl-NL;q=0.7,nl;q=0.6,en-GB;q=0.5',
-            'cache-control': 'no-cache',
-            'cookie': self._cookie,
+            "authority": "api.button.plus",
+            "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+            "accept-language": "en-NL,en-US;q=0.9,en;q=0.8,nl-NL;q=0.7,nl;q=0.6,en-GB;q=0.5",
+            "cache-control": "no-cache",
+            "cookie": self._cookie,
         }
 
-        _LOGGER.debug(f"Initialize Button+ API client")
+        _LOGGER.debug("Initialize Button+ API client")
 
     async def test_connection(self):
         url = f"{self._base}/button/buttons"
@@ -54,22 +54,24 @@ class ApiClient:
         json_data = json.dumps(data)
         _LOGGER.debug(f"json dump: {json_data}")
         headers = {
-            'accept': '*/*',
-            'accept-language': 'en-NL,en;q=0.9',
-            'content-type': 'application/json',
-            'origin': 'https://button.plus',
-            'referer': 'https://button.plus/',
-            'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            "accept": "*/*",
+            "accept-language": "en-NL,en;q=0.9",
+            "content-type": "application/json",
+            "origin": "https://button.plus",
+            "referer": "https://button.plus/",
+            "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
         }
 
         async with self._session.post(url, data=json_data, headers=headers) as response:
             response_body = await response.text()
 
             if not response.cookies:
-                raise Exception(f"Login error with username and password, response: {response_body}")
+                raise Exception(
+                    f"Login error with username and password, response: {response_body}"
+                )
 
             cookie_string = str(response.cookies)
-            match = re.search(r'auth_cookie=[^;]+', cookie_string)
+            match = re.search(r"auth_cookie=[^;]+", cookie_string)
 
             auth_cookie = match.group()
 
