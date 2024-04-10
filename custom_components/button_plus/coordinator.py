@@ -35,7 +35,7 @@ class ButtonPlusCoordinator(DataUpdateCoordinator):
 
     async def _async_update_data(self):
         """Create MQTT subscriptions for buttonplus"""
-        _LOGGER.debug(f"Initial data fetch from coordinator")
+        _LOGGER.debug("Initial data fetch from coordinator")
         if not self._mqtt_subscribed_buttons:
             self.unsubscribe_mqtt = await mqtt.async_subscribe(
                 self._hass, self._mqtt_topic_buttons, self.mqtt_button_callback, 0
@@ -61,9 +61,9 @@ class ButtonPlusCoordinator(DataUpdateCoordinator):
     async def mqtt_page_callback(self, message: ReceiveMessage):
         # Handle the message here
         _LOGGER.debug(f"Received message on topic {message.topic}: {message.payload}")
-        match = re.search(r"/page/(\w+)", message.topic)
+        # match = re.search(r"/page/(\w+)", message.topic)
         # is 'status' or 'set'
-        page_type = match.group(1)
+        # page_type = match.group(1)
 
         # TODO: implement page control
 

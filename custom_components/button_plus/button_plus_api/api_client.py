@@ -27,7 +27,7 @@ class ApiClient:
             "cookie": self._cookie,
         }
 
-        _LOGGER.debug(f"Initialize Button+ API client")
+        _LOGGER.debug("Initialize Button+ API client")
 
     async def test_connection(self):
         url = f"{self._base}/button/buttons"

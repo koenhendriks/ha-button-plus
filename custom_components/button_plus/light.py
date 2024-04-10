@@ -98,7 +98,7 @@ class ButtonPlusLight(LightEntity):
                     )
                 }
             case 2:
-                device_info["name"] = f"Display Module"
+                device_info["name"] = "Display Module"
                 device_info["connections"] = {("display_module", 1)}
                 device_info["model"] = "Display Module"
                 device_info["identifiers"] = {

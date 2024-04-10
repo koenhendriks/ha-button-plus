@@ -71,7 +71,6 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         )
 
     async def async_step_choose_entry(self, user_input=None):
-        errors = {}
         # if user_input is not None:
         return self.async_show_menu(
             step_id="choose_entry",
@@ -239,7 +238,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         broker_password = mqtt_entry.data.get("password", "")
 
         broker = MqttBroker(
-            broker_id=f"ha-button-plus",
+            broker_id="ha-button-plus",
             url=f"mqtt://{self.broker_endpoint}/",
             port=broker_port,
             ws_port=9001,
