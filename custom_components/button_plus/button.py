@@ -3,18 +3,28 @@
 from __future__ import annotations
 
 import logging
+from datetime import timedelta
+from functools import cached_property
+from typing import Any
 
 from homeassistant.components.button import ButtonEntity, ButtonDeviceClass
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.device_registry import DeviceInfo
+from homeassistant.helpers.entity_platform import (
+    AddEntitiesCallback,
+    async_get_current_platform,
+)
 
 from .button_plus_api.model import Connector, ConnectorEnum
 from .const import DOMAIN
 from . import ButtonPlusHub
 
 _LOGGER = logging.getLogger(__name__)
+
+SCAN_INTERVAL = timedelta(seconds=30)
+SERVICE_LONG_PRESS = "long_press"
+SERVICE_RELEASE = "release"
 
 
 async def async_setup_entry(
@@ -47,8 +57,23 @@ async def async_setup_entry(
 
     async_add_entities(button_entities)
 
+    platform = async_get_current_platform()
+    platform.async_register_entity_service(
+        SERVICE_LONG_PRESS,
+        {},
+        "_async_long_press_action",
+    )
+
+    platform.async_register_entity_service(
+        SERVICE_RELEASE,
+        {},
+        "_async_release_action",
+    )
+
 
 class ButtonPlusButton(ButtonEntity):
+    _attr_click_type: str | None = None
+
     def __init__(self, btn_id: int, hub: ButtonPlusHub):
         self._is_on = False
         self._hub_id = hub.hub_id
@@ -107,3 +132,24 @@ class ButtonPlusButton(ButtonEntity):
     async def async_press(self) -> None:
         """Handle the button press."""
         _LOGGER.debug(f"async press from mqtt button: {self._btn_id}")
+
+    async def _async_long_press_action(self) -> None:
+        self._attr_click_type = "long"
+        await super()._async_press_action()
+
+    async def _async_press_action(self) -> None:
+        self._attr_click_type = "single"
+        await super()._async_press_action()
+
+    async def _async_release_action(self) -> None:
+        pass
+
+    @property
+    def state_attributes(self) -> dict[str, Any] | None:
+        return {
+            "click_type": self._attr_click_type,
+        }
+
+    @cached_property
+    def click_type(self) -> str | None:
+        return self._attr_click_type
