@@ -45,16 +45,6 @@
         },
         "description": "To continue, pick the desired option to setup your Button+ devices."
       }
-    },
-    "services": {
-      "long_press": {
-        "name": "Long press",
-        "description": "Long press on a button on button+"
-      },
-      "release": {
-        "name": "Release",
-        "description": "Release of a button on button+"
-      }
     }
   }
 }
