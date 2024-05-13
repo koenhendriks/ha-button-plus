@@ -102,7 +102,7 @@ class ButtonPlusBrightness(NumberEntity):
             identifiers=identifiers,
         )
 
-    async def async_set_value(self, value: float) -> None:
+    async def async_set_native_value(self, value: float) -> None:
         """Set the text value and publish to mqtt."""
         label_topic = f"buttonplus/{self._hub_id}/brightness/{self._brightness_type}"
         _LOGGER.debug(f"ButtonPlus brightness update for {self.entity_id}")
