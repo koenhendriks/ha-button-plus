@@ -7,7 +7,8 @@ import logging
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 
-from custom_components.button_plus.button_plus_api.model import DeviceConfiguration
+from custom_components.button_plus.button_plus_api.model_interface import DeviceConfiguration
+from custom_components.button_plus.button_plus_api.model_detection import ModelDetection
 from custom_components.button_plus.buttonplushub import ButtonPlusHub
 from custom_components.button_plus.const import DOMAIN
 from custom_components.button_plus.coordinator import ButtonPlusCoordinator
@@ -23,7 +24,7 @@ PLATFORMS: list[str] = ["button", "text", "number"]
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Button+ from a config entry."""
     _LOGGER.debug(f"Button+ init got new device entry! {entry.entry_id.title}")
-    device_configuration: DeviceConfiguration = DeviceConfiguration.from_json(
+    device_configuration: DeviceConfiguration = ModelDetection.model_for_json(
         entry.data.get("config")
     )
 

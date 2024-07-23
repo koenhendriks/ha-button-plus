@@ -4,7 +4,6 @@ from typing import List, Dict, Any
 from .connector_type import ConnectorEnum
 from .event_type import EventType
 
-
 class Connector:
     def __init__(self, connector_id: int, connector_type: int):
         self.connector_id = connector_id

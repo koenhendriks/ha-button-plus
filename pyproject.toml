@@ -6,3 +6,8 @@ dependencies = [
   "homeassistant",
   "pre-commit",
 ]
+
+[tool.pytest.ini_options]
+pythonpath = [
+  "."
+]

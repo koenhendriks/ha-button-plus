@@ -27,6 +27,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     new_devices = []
     for device in hub.devices:
         new_devices.append(IlluminanceSensor(device))
+
     if new_devices:
         async_add_entities(new_devices)
 

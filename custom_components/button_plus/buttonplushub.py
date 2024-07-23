@@ -10,7 +10,8 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers import aiohttp_client
 
 from .button_plus_api.local_api_client import LocalApiClient
-from .button_plus_api.model import ConnectorEnum, DeviceConfiguration
+from .button_plus_api.connector_type import ConnectorEnum
+from .button_plus_api.model_interface import DeviceConfiguration
 from .const import DOMAIN, MANUFACTURER
 
 
