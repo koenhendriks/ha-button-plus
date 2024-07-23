@@ -184,15 +184,14 @@ class DeviceConfiguration:
         self.mqtt_sensors = mqtt_sensors
 
     @staticmethod
-    def from_json(json_data: str) -> "DeviceConfiguration":
-        data = json.loads(json_data)
+    def from_json(json_data: any) -> "DeviceConfiguration":
         return DeviceConfiguration(
-            info=Info.from_dict(data["info"]),
-            core=Core.from_dict(data["core"]),
-            mqtt_buttons=[MqttButton.from_dict(button) for button in data["mqttbuttons"]],
-            mqtt_displays=[MqttDisplay.from_dict(display) for display in data["mqttdisplays"]],
-            mqtt_brokers=[MqttBroker.from_dict(broker) for broker in data["mqttbrokers"]],
-            mqtt_sensors=[MqttSensor.from_dict(sensor) for sensor in data["mqttsensors"]]
+            info=Info.from_dict(json_data["info"]),
+            core=Core.from_dict(json_data["core"]),
+            mqtt_buttons=[MqttButton.from_dict(button) for button in json_data["mqttbuttons"]],
+            mqtt_displays=[MqttDisplay.from_dict(display) for display in json_data["mqttdisplays"]],
+            mqtt_brokers=[MqttBroker.from_dict(broker) for broker in json_data["mqttbrokers"]],
+            mqtt_sensors=[MqttSensor.from_dict(sensor) for sensor in json_data["mqttsensors"]]
         )
 
     def to_json(self) -> str:

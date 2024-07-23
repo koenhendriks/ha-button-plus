@@ -1,14 +1,17 @@
 import pytest
+import json
 
 from custom_components.button_plus.button_plus_api.model_v1_07 import DeviceConfiguration
+
 
 @pytest.fixture
 def device_config():
     # Load and parse the JSON file
     with open('resource/physicalconfig1.07.json') as file:
-        json_data = file.read()
+        json_data = json.loads(file.read())
         # Parse the JSON data into a DeviceConfiguration object
         return DeviceConfiguration.from_json(json_data)
+
 
 def test_buttons(device_config):
     buttons = device_config.mqtt_buttons
@@ -23,6 +26,7 @@ def test_buttons(device_config):
     assert buttons[2].topics[0].topic == 'buttonplus/btn_4967c8/bars/2/click'
     assert buttons[2].topics[0].payload == 'true'
     assert buttons[2].topics[0].event_type == 0
+
 
 def test_mqttdisplays(device_config):
     mqttdisplays = device_config.mqtt_displays
@@ -41,6 +45,7 @@ def test_mqttdisplays(device_config):
     assert mqttdisplays[0].topics[0].event_type == 15
     assert mqttdisplays[1].unit == '°C'
 
+
 def test_mqttbrokers(device_config):
     mqttbrokers = device_config.mqtt_brokers
     assert len(mqttbrokers) == 2
@@ -56,6 +61,7 @@ def test_mqttbrokers(device_config):
     assert mqttbrokers[1].ws_port == 9001
     assert mqttbrokers[1].username == 'koen'
     assert mqttbrokers[1].password == 'koen'
+
 
 def test_mqttsensors(device_config):
     mqttsensors = device_config.mqtt_sensors
