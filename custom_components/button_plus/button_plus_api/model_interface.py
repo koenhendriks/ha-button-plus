@@ -1,6 +1,6 @@
 from typing import List
 
-from button_plus.button_plus_api.connector_type import ConnectorType
+from custom_components.button_plus.button_plus_api.connector_type import ConnectorType
 
 
 class Connector:
