@@ -16,7 +16,7 @@ from homeassistant.helpers.entity_platform import (
     async_get_current_platform,
 )
 
-from .button_plus_api.model import Connector, ConnectorEnum
+from .button_plus_api.model_interface import Connector, ConnectorType
 from .const import DOMAIN
 from . import ButtonPlusHub
 
@@ -37,14 +37,13 @@ async def async_setup_entry(
     button_entities: list[ButtonPlusButton] = []
     hub: ButtonPlusHub = hass.data[DOMAIN][config_entry.entry_id]
 
-    active_connectors = active_connectors = [
-        connector.connector_id
-        for connector in hub.config.info.connectors
-        if connector.connector_type_enum() in [ConnectorEnum.DISPLAY, ConnectorEnum.BAR]
+    active_connectors = [
+        connector.identifier()
+        for connector in hub.config.connectors_for(ConnectorType.BAR, ConnectorType.DISPLAY)
     ]
 
     buttons = filter(
-        lambda b: b.button_id // 2 in active_connectors, hub.config.mqtt_buttons
+        lambda b: b.button_id // 2 in active_connectors, hub.config.buttons()
     )
 
     for button in buttons:
@@ -83,18 +82,18 @@ class ButtonPlusButton(ButtonEntity):
         self._attr_name = f"button-{btn_id}"
         self._name = f"Button {btn_id}"
         self._device_class = ButtonDeviceClass.IDENTIFY
-        self._connector: Connector = hub.config.info.connectors[btn_id // 2]
-        self.unique_id = self.unique_id_gen()
+        self._connector: Connector = hub.config.connector_for(btn_id // 2)
+        self.our_id = self.unique_id_gen()
 
     def unique_id_gen(self):
-        match self._connector.connector_type_enum():
-            case ConnectorEnum.BAR:
+        match self._connector.connector_type():
+            case ConnectorType.BAR:
                 return self.unique_id_gen_bar()
-            case ConnectorEnum.DISPLAY:
+            case ConnectorType.DISPLAY:
                 return self.unique_id_gen_display()
 
     def unique_id_gen_bar(self):
-        return f"button_{self._hub_id}_{self._btn_id}_bar_module_{self._connector.connector_id}"
+        return f"button_{self._hub_id}_{self._btn_id}_bar_module_{self._connector.identifier()}"
 
     def unique_id_gen_display(self):
         return f"button_{self._hub_id}_{self._btn_id}_display_module"
@@ -112,17 +111,17 @@ class ButtonPlusButton(ButtonEntity):
     def device_info(self) -> DeviceInfo:
         """Return information to link this entity with the correct device."""
 
-        identifiers: set[tuple[str, str]] = {}
+        identifiers: set[tuple[str, str]] = set()
 
-        match self._connector.connector_type_enum():
-            case ConnectorEnum.BAR:
+        match self._connector.connector_type():
+            case ConnectorType.BAR:
                 identifiers = {
                     (
                         DOMAIN,
-                        f"{self._hub.hub_id} BAR Module {self._connector.connector_id}",
+                        f"{self._hub.hub_id} BAR Module {self._connector.identifier()}",
                     )
                 }
-            case ConnectorEnum.DISPLAY:
+            case ConnectorType.DISPLAY:
                 identifiers = {(DOMAIN, f"{self._hub.hub_id} Display Module")}
 
         return DeviceInfo(

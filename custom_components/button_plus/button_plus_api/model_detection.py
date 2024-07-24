@@ -1,6 +1,6 @@
 from typing import Dict, Any
 import json
-from packaging.version import parse as parseSemver, Version as SemverVersion
+from packaging.version import parse as parseSemver
 from .model_interface import DeviceConfiguration
 
 

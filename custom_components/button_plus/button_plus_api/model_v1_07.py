@@ -1,20 +1,25 @@
 import json
 from typing import List, Dict, Any
 
-from .connector_type import ConnectorEnum
+from .connector_type import ConnectorType
 from .event_type import EventType
+from .model_interface import Button
+
 
 class Connector:
-    def __init__(self, connector_id: int, connector_type: int):
-        self.connector_id = connector_id
+    def __init__(self, identifier: int, connector_type: int):
+        self.identifier = identifier
         self.connector_type = connector_type
-
-    def connector_type_enum(self) -> ConnectorEnum:
-        return ConnectorEnum(self.connector_type)
 
     @staticmethod
     def from_dict(data: Dict[str, Any]) -> "Connector":
-        return Connector(connector_id=data["id"], connector_type=data["type"])
+        return Connector(identifier=data["id"], connector_type=data["type"])
+
+    def identifier(self) -> int:
+        return self.identifier
+
+    def connector_type(self) -> ConnectorType:
+        return ConnectorType(self.connector_type)
 
 
 class Sensor:
@@ -29,14 +34,14 @@ class Sensor:
 
 class Info:
     def __init__(
-        self,
-        device_id: str,
-        mac: str,
-        ip_address: str,
-        firmware: str,
-        large_display: int,
-        connectors: List[Connector],
-        sensors: List[Sensor],
+            self,
+            device_id: str,
+            mac: str,
+            ip_address: str,
+            firmware: str,
+            large_display: int,
+            connectors: List[Connector],
+            sensors: List[Sensor],
     ):
         self.device_id = device_id
         self.mac = mac
@@ -83,16 +88,16 @@ class Topic:
 
 class Core:
     def __init__(
-        self,
-        name: str,
-        location: str,
-        auto_backup: bool,
-        brightness_large_display: int,
-        brightness_mini_display: int,
-        led_color_front: int,
-        led_color_wall: int,
-        color: int,
-        topics: List[Topic],
+            self,
+            name: str,
+            location: str,
+            auto_backup: bool,
+            brightness_large_display: int,
+            brightness_mini_display: int,
+            led_color_front: int,
+            led_color_wall: int,
+            color: int,
+            topics: List[Topic],
     ):
         self.name = name
         self.location = location
@@ -119,17 +124,17 @@ class Core:
         )
 
 
-class MqttButton:
+class MqttButton(Button):
     def __init__(
-        self,
-        button_id: int,
-        label: str,
-        top_label: str,
-        led_color_front: int,
-        led_color_wall: int,
-        long_delay: int,
-        long_repeat: int,
-        topics: List[Topic],
+            self,
+            button_id: int,
+            label: str,
+            top_label: str,
+            led_color_front: int,
+            led_color_wall: int,
+            long_delay: int,
+            long_repeat: int,
+            topics: List[Topic],
     ):
         self.button_id = button_id
         self.label = label
@@ -156,16 +161,16 @@ class MqttButton:
 
 class MqttDisplay:
     def __init__(
-        self,
-        x: int,
-        y: int,
-        font_size: int,
-        align: int,
-        width: int,
-        label: str,
-        unit: str,
-        round: int,
-        topics: List[Topic],
+            self,
+            x: int,
+            y: int,
+            font_size: int,
+            align: int,
+            width: int,
+            label: str,
+            unit: str,
+            round: int,
+            topics: List[Topic],
     ):
         self.x = x
         self.y = y
@@ -194,13 +199,13 @@ class MqttDisplay:
 
 class MqttBroker:
     def __init__(
-        self,
-        broker_id: str,
-        url: str,
-        port: int,
-        ws_port: int,
-        username: str,
-        password: str,
+            self,
+            broker_id: str,
+            url: str,
+            port: int,
+            ws_port: int,
+            username: str,
+            password: str,
     ):
         self.broker_id = broker_id
         self.url = url
@@ -238,13 +243,13 @@ class MqttSensor:
 
 class DeviceConfiguration:
     def __init__(
-        self,
-        info: Info,
-        core: Core,
-        mqtt_buttons: List[MqttButton],
-        mqtt_displays: List[MqttDisplay],
-        mqtt_brokers: List[MqttBroker],
-        mqtt_sensors: List[MqttSensor],
+            self,
+            info: Info,
+            core: Core,
+            mqtt_buttons: List[MqttButton],
+            mqtt_displays: List[MqttDisplay],
+            mqtt_brokers: List[MqttBroker],
+            mqtt_sensors: List[MqttSensor],
     ):
         self.info = info
         self.core = core
@@ -298,7 +303,7 @@ class DeviceConfiguration:
                     d["largedisplay"] = d.pop("large_display")
 
                 elif isinstance(obj, Connector):
-                    d["id"] = d.pop("connector_id")
+                    d["id"] = d.pop("identifier")
                     d["type"] = d.pop("connector_type")
 
                 elif isinstance(obj, Sensor):
@@ -342,3 +347,32 @@ class DeviceConfiguration:
                 return str(obj)
 
         return json.dumps(self, default=serialize, indent=4)
+
+    def firmware_version(self) -> str:
+        return self.info.firmware
+
+    def name(self) -> str:
+        return self.core.name or self.info.device_id
+
+    def identifier(self) -> str:
+        return self.info.device_id
+
+    def ip_address(self) -> str:
+        return self.info.ip_address
+
+    def mac_address(self) -> str:
+        return self.info.mac
+
+    def location(self) -> str:
+        return self.core.location
+
+    def connector_for(self, *identifier: int) -> Connector:
+        return next(
+            (connector for connector in self.info.connectors if connector.identifier == identifier), None
+        )
+
+    def connectors_for(self, *connector_type: ConnectorType) -> List[Connector]:
+        return [connector for connector in self.info.connectors if connector.connector_type in [connector_type]]
+
+    def buttons(self) -> List[Button]:
+        return [button for button in self.mqtt_buttons]

@@ -67,7 +67,7 @@ class ApiClient:
 
             if not response.cookies:
                 raise Exception(
-                    f"Login error with username and password, response: {response_body}"
+                    f'Login error with username and password, response: {response_body}'
                 )
 
             cookie_string = str(response.cookies)

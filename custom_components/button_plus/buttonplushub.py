@@ -3,17 +3,17 @@
 from __future__ import annotations
 
 import logging
+from typing import List
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.helpers import device_registry as dr
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import aiohttp_client
+from homeassistant.helpers import device_registry as dr
 
+from .button_plus_api.connector_type import ConnectorType
 from .button_plus_api.local_api_client import LocalApiClient
-from .button_plus_api.connector_type import ConnectorEnum
 from .button_plus_api.model_interface import DeviceConfiguration
 from .const import DOMAIN, MANUFACTURER
-
 
 _LOGGER: logging.Logger = logging.getLogger(__package__)
 
@@ -22,15 +22,15 @@ class ButtonPlusHub:
     """hub for Button+."""
 
     def __init__(
-        self, hass: HomeAssistant, config: DeviceConfiguration, entry: ConfigEntry
+            self, hass: HomeAssistant, config: DeviceConfiguration, entry: ConfigEntry
     ) -> None:
-        _LOGGER.debug(f"New hub with config {config.core}")
+        _LOGGER.debug(f"New hub with config {config}")
         self._hass = hass
         self.config = config
-        self._name = config.core.name or config.info.device_id
-        self._id = config.info.device_id
+        self._name = config.name()
+        self.identifier = config.identifier()
         self._client = LocalApiClient(
-            config.info.ip_address, aiohttp_client.async_get_clientsession(hass)
+            config.ip_address(), aiohttp_client.async_get_clientsession(hass)
         )
         self.online = True
         self.button_entities = {}
@@ -41,55 +41,53 @@ class ButtonPlusHub:
         device_registry = dr.async_get(hass)
 
         self.device = device_registry.async_get_or_create(
-            configuration_url=f"http://{self.config.info.ip_address}/",
+            configuration_url=f"http://{self.config.ip_address()}/",
             config_entry_id=entry.entry_id,
-            connections={(dr.CONNECTION_NETWORK_MAC, self.config.info.mac)},
-            identifiers={(DOMAIN, self.config.info.device_id)},
+            connections={(dr.CONNECTION_NETWORK_MAC, self.config.mac_address())},
+            identifiers={(DOMAIN, self.config.identifier())},
             manufacturer=MANUFACTURER,
-            suggested_area=self.config.core.location,
+            suggested_area=self.config.location(),
             name=self._name,
             model="Base Module",
-            sw_version=config.info.firmware,
+            sw_version=config.firmware_version(),
         )
 
         # 1 or none display module
         self.display_module = next(
             (
                 self.create_display_module(hass, entry, self)
-                for _ in self.connector(ConnectorEnum.DISPLAY)
+                for _ in self.connector_identifiers_for(ConnectorType.DISPLAY)
             ),
             None,
         )
         self.display_bar = [
             (connector_id, self.create_bar_module(hass, entry, self, connector_id))
-            for connector_id in self.connector(ConnectorEnum.BAR)
+            for connector_id in self.connector_identifiers_for(ConnectorType.BAR)
         ]
 
-    def create_display_module(
-        self, hass: HomeAssistant, entry: ConfigEntry, hub: ButtonPlusHub
-    ) -> None:
+    @staticmethod
+    def create_display_module(hass: HomeAssistant, entry: ConfigEntry, hub: ButtonPlusHub) -> None:
         _LOGGER.debug(f"Add display module from '{hub.hub_id}'")
         device_registry = dr.async_get(hass)
 
         device = device_registry.async_get_or_create(
             config_entry_id=entry.entry_id,
-            # connections={(DOMAIN, hub.config.info.device_id)},
             name=f"{hub.name} Display Module",
             model="Display Module",
             manufacturer=MANUFACTURER,
-            suggested_area=hub.config.core.location,
+            suggested_area=hub.config.location(),
             identifiers={(DOMAIN, f"{hub.hub_id} Display Module")},
             via_device=(DOMAIN, hub.hub_id),
         )
 
         return device
 
+    @staticmethod
     def create_bar_module(
-        self,
-        hass: HomeAssistant,
-        entry: ConfigEntry,
-        hub: ButtonPlusHub,
-        connector_id: int,
+            hass: HomeAssistant,
+            entry: ConfigEntry,
+            hub: ButtonPlusHub,
+            connector_id: int,
     ) -> None:
         _LOGGER.debug(
             f"Add bar module from '{hub.hub_id}' with connector '{connector_id}'"
@@ -98,22 +96,20 @@ class ButtonPlusHub:
 
         device = device_registry.async_get_or_create(
             config_entry_id=entry.entry_id,
-            # connections={(DOMAIN, hub.config.info.device_id)},
             name=f"{hub._name} BAR Module {connector_id}",
             model="Bar module",
             manufacturer=MANUFACTURER,
-            suggested_area=hub.config.core.location,
-            identifiers={(DOMAIN, f"{hub.hub_id} BAR Module {connector_id}")},
+            suggested_area=hub.config.location(),
+            identifiers={(DOMAIN, f"{hub.identifier} BAR Module {connector_id}")},
             via_device=(DOMAIN, hub.hub_id),
         )
 
         return device
 
-    def connector(self, connector_type: ConnectorEnum):
+    def connector_identifiers_for(self, connector_type: ConnectorType) -> List[int]:
         return [
-            connector.connector_id
-            for connector in self.config.info.connectors
-            if connector.connector_type_enum() in [connector_type]
+            connector.identifier()
+            for connector in self.config.connectors_for(connector_type)
         ]
 
     @property
@@ -123,7 +119,7 @@ class ButtonPlusHub:
 
     @property
     def hub_id(self) -> str:
-        return self._id
+        return self.identifier
 
     @property
     def name(self) -> str:
