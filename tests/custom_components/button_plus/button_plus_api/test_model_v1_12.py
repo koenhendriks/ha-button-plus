@@ -1,10 +1,12 @@
-from custom_components.button_plus.button_plus_api.model_v1_12 import DeviceConfiguration
+from custom_components.button_plus.button_plus_api.model_v1_12 import (
+    DeviceConfiguration,
+)
 import json
 
 
 def test_model_v1_12_from_to_json_should_be_same():
     # Load the JSON file
-    with open('resource/physicalconfig1.12.1.json') as file:
+    with open("resource/physicalconfig1.12.1.json") as file:
         json_data = json.loads(file.read())
 
     # Parse the JSON data into a DeviceConfiguration object
@@ -22,7 +24,7 @@ def test_model_v1_12_from_to_json_should_be_same():
 
 def test_model_v1_12():
     # Load the JSON file
-    with open('resource/physicalconfig1.12.1.json') as file:
+    with open("resource/physicalconfig1.12.1.json") as file:
         json_data = json.loads(file.read())
 
     # Parse the JSON data into a DeviceConfiguration object
@@ -38,7 +40,7 @@ def test_model_v1_12():
     # Assert the values from the parsed Core object
     assert device_config.core.name == "btn_4584b8"
     assert device_config.core.location == "Room 1"
-    assert device_config.core.auto_backup == True
+    assert device_config.core.auto_backup == "true"
     assert device_config.core.brightness == 80
     assert device_config.core.color == 16765791
     assert device_config.core.statusbar == 2

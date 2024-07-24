@@ -22,7 +22,7 @@ class ButtonPlusHub:
     """hub for Button+."""
 
     def __init__(
-            self, hass: HomeAssistant, config: DeviceConfiguration, entry: ConfigEntry
+        self, hass: HomeAssistant, config: DeviceConfiguration, entry: ConfigEntry
     ) -> None:
         _LOGGER.debug(f"New hub with config {config}")
         self._hass = hass
@@ -66,7 +66,9 @@ class ButtonPlusHub:
         ]
 
     @staticmethod
-    def create_display_module(hass: HomeAssistant, entry: ConfigEntry, hub: ButtonPlusHub) -> None:
+    def create_display_module(
+        hass: HomeAssistant, entry: ConfigEntry, hub: ButtonPlusHub
+    ) -> None:
         _LOGGER.debug(f"Add display module from '{hub.hub_id}'")
         device_registry = dr.async_get(hass)
 
@@ -84,10 +86,10 @@ class ButtonPlusHub:
 
     @staticmethod
     def create_bar_module(
-            hass: HomeAssistant,
-            entry: ConfigEntry,
-            hub: ButtonPlusHub,
-            connector_id: int,
+        hass: HomeAssistant,
+        entry: ConfigEntry,
+        hub: ButtonPlusHub,
+        connector_id: int,
     ) -> None:
         _LOGGER.debug(
             f"Add bar module from '{hub.hub_id}' with connector '{connector_id}'"

@@ -30,7 +30,10 @@ class ButtonPlusCoordinator(DataUpdateCoordinator):
         self._mqtt_subscribed_buttons = False
         self._mqtt_topics = [
             (f"buttonplus/{hub.hub_id}/button/+/click", self.mqtt_button_callback),
-            (f"buttonplus/{hub.hub_id}/button/+/long_press", self.mqtt_button_long_press_callback),
+            (
+                f"buttonplus/{hub.hub_id}/button/+/long_press",
+                self.mqtt_button_long_press_callback,
+            ),
             (f"buttonplus/{hub.hub_id}/brightness/+", self.mqtt_brightness_callback),
             (f"buttonplus/{hub.hub_id}/page/+", self.mqtt_page_callback),
         ]
@@ -41,10 +44,7 @@ class ButtonPlusCoordinator(DataUpdateCoordinator):
         if not self._mqtt_subscribed_buttons:
             for topic, cb in self._mqtt_topics:
                 self.unsubscribe_mqtt = await mqtt.async_subscribe(
-                    self._hass,
-                    topic,
-                    cb,
-                    0
+                    self._hass, topic, cb, 0
                 )
                 _LOGGER.debug(f"MQTT subscribed to {topic}")
 
@@ -88,13 +88,11 @@ class ButtonPlusCoordinator(DataUpdateCoordinator):
     async def mqtt_button_long_press_callback(self, message: ReceiveMessage):
         # Handle the message here
         _LOGGER.debug(f"Received message on topic {message.topic}: {message.payload}")
-        match = re.search(r'/(\d+)/long_press', message.topic)
+        match = re.search(r"/(\d+)/long_press", message.topic)
         btn_id = int(match.group(1)) if match else None
 
         entity: ButtonEntity = self.hub.button_entities[str(btn_id)]
 
         await self.hass.services.async_call(
-            DOMAIN,
-            'long_press',
-            target={"entity_id": entity.entity_id}
+            DOMAIN, "long_press", target={"entity_id": entity.entity_id}
         )

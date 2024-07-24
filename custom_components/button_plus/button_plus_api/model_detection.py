@@ -1,4 +1,3 @@
-from typing import Dict, Any
 import json
 from packaging.version import parse as parseSemver
 from .model_interface import DeviceConfiguration
@@ -12,7 +11,9 @@ class ModelDetection:
 
         if device_version >= parseSemver("1.12.0"):
             from .model_v1_12 import DeviceConfiguration
+
             return DeviceConfiguration.from_json(data)
         else:
             from .model_v1_07 import DeviceConfiguration
+
             return DeviceConfiguration.from_json(data)

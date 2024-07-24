@@ -343,12 +343,14 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             )
 
             # Create topics for button click
-            button.topics.append({
-                "brokerid": "ha-button-plus",
-                "topic": f"buttonplus/{device_id}/button/{button.button_id}/long_press",
-                "payload": "press",
-                "eventtype": EventType.LONG_PRESS
-            })
+            button.topics.append(
+                {
+                    "brokerid": "ha-button-plus",
+                    "topic": f"buttonplus/{device_id}/button/{button.button_id}/long_press",
+                    "payload": "press",
+                    "eventtype": EventType.LONG_PRESS,
+                }
+            )
 
         return device_config
 

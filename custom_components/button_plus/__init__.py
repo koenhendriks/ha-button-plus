@@ -7,7 +7,9 @@ import logging
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 
-from custom_components.button_plus.button_plus_api.model_interface import DeviceConfiguration
+from custom_components.button_plus.button_plus_api.model_interface import (
+    DeviceConfiguration,
+)
 from custom_components.button_plus.button_plus_api.model_detection import ModelDetection
 from custom_components.button_plus.buttonplushub import ButtonPlusHub
 from custom_components.button_plus.const import DOMAIN

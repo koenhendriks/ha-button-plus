@@ -10,11 +10,11 @@ from .const import DOMAIN, MANUFACTURER
 
 class BarModuleDevice:
     def __init__(
-            self,
-            hass: HomeAssistant,
-            entry: ConfigEntry,
-            hub: ButtonPlusHub,
-            connector_id: int,
+        self,
+        hass: HomeAssistant,
+        entry: ConfigEntry,
+        hub: ButtonPlusHub,
+        connector_id: int,
     ) -> None:
         self.device_registry = dr.async_get(hass)
 
@@ -32,7 +32,7 @@ class BarModuleDevice:
 
 class DisplayModuleDevice:
     def __init__(
-            self, hass: HomeAssistant, entry: ConfigEntry, hub: ButtonPlusHub
+        self, hass: HomeAssistant, entry: ConfigEntry, hub: ButtonPlusHub
     ) -> None:
         self.device_registry = dr.async_get(hass)
 

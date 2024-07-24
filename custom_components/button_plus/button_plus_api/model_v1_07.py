@@ -34,14 +34,14 @@ class Sensor:
 
 class Info:
     def __init__(
-            self,
-            device_id: str,
-            mac: str,
-            ip_address: str,
-            firmware: str,
-            large_display: int,
-            connectors: List[Connector],
-            sensors: List[Sensor],
+        self,
+        device_id: str,
+        mac: str,
+        ip_address: str,
+        firmware: str,
+        large_display: int,
+        connectors: List[Connector],
+        sensors: List[Sensor],
     ):
         self.device_id = device_id
         self.mac = mac
@@ -88,16 +88,16 @@ class Topic:
 
 class Core:
     def __init__(
-            self,
-            name: str,
-            location: str,
-            auto_backup: bool,
-            brightness_large_display: int,
-            brightness_mini_display: int,
-            led_color_front: int,
-            led_color_wall: int,
-            color: int,
-            topics: List[Topic],
+        self,
+        name: str,
+        location: str,
+        auto_backup: bool,
+        brightness_large_display: int,
+        brightness_mini_display: int,
+        led_color_front: int,
+        led_color_wall: int,
+        color: int,
+        topics: List[Topic],
     ):
         self.name = name
         self.location = location
@@ -126,15 +126,15 @@ class Core:
 
 class MqttButton(Button):
     def __init__(
-            self,
-            button_id: int,
-            label: str,
-            top_label: str,
-            led_color_front: int,
-            led_color_wall: int,
-            long_delay: int,
-            long_repeat: int,
-            topics: List[Topic],
+        self,
+        button_id: int,
+        label: str,
+        top_label: str,
+        led_color_front: int,
+        led_color_wall: int,
+        long_delay: int,
+        long_repeat: int,
+        topics: List[Topic],
     ):
         self.button_id = button_id
         self.label = label
@@ -161,16 +161,16 @@ class MqttButton(Button):
 
 class MqttDisplay:
     def __init__(
-            self,
-            x: int,
-            y: int,
-            font_size: int,
-            align: int,
-            width: int,
-            label: str,
-            unit: str,
-            round: int,
-            topics: List[Topic],
+        self,
+        x: int,
+        y: int,
+        font_size: int,
+        align: int,
+        width: int,
+        label: str,
+        unit: str,
+        round: int,
+        topics: List[Topic],
     ):
         self.x = x
         self.y = y
@@ -199,13 +199,13 @@ class MqttDisplay:
 
 class MqttBroker:
     def __init__(
-            self,
-            broker_id: str,
-            url: str,
-            port: int,
-            ws_port: int,
-            username: str,
-            password: str,
+        self,
+        broker_id: str,
+        url: str,
+        port: int,
+        ws_port: int,
+        username: str,
+        password: str,
     ):
         self.broker_id = broker_id
         self.url = url
@@ -243,13 +243,13 @@ class MqttSensor:
 
 class DeviceConfiguration:
     def __init__(
-            self,
-            info: Info,
-            core: Core,
-            mqtt_buttons: List[MqttButton],
-            mqtt_displays: List[MqttDisplay],
-            mqtt_brokers: List[MqttBroker],
-            mqtt_sensors: List[MqttSensor],
+        self,
+        info: Info,
+        core: Core,
+        mqtt_buttons: List[MqttButton],
+        mqtt_displays: List[MqttDisplay],
+        mqtt_brokers: List[MqttBroker],
+        mqtt_sensors: List[MqttSensor],
     ):
         self.info = info
         self.core = core
@@ -368,11 +368,20 @@ class DeviceConfiguration:
 
     def connector_for(self, *identifier: int) -> Connector:
         return next(
-            (connector for connector in self.info.connectors if connector.identifier == identifier), None
+            (
+                connector
+                for connector in self.info.connectors
+                if connector.identifier == identifier
+            ),
+            None,
         )
 
     def connectors_for(self, *connector_type: ConnectorType) -> List[Connector]:
-        return [connector for connector in self.info.connectors if connector.connector_type in [connector_type]]
+        return [
+            connector
+            for connector in self.info.connectors
+            if connector.connector_type in [connector_type]
+        ]
 
     def buttons(self) -> List[Button]:
         return [button for button in self.mqtt_buttons]
