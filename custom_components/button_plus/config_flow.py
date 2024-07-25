@@ -17,7 +17,7 @@ from packaging import version
 
 from .button_plus_api.api_client import ApiClient
 from .button_plus_api.local_api_client import LocalApiClient
-from .button_plus_api.model import ConnectorEnum, DeviceConfiguration, MqttBroker
+from .button_plus_api.model_interface import ConnectorType, DeviceConfiguration, MqttBroker, Topic
 from .button_plus_api.event_type import EventType
 from .const import DOMAIN
 
@@ -103,8 +103,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     await api_client.push_config(device_config)
 
                     return self.async_create_entry(
-                        title=f"{device_config.core.name}",
-                        description=f"Base module on {ip} with id {device_config.info.device_id}",
+                        title=f"{device_config.name()}",
+                        description=f"Base module on {ip} with id {device_config.identifier()}",
                         data={"config": json_config},
                     )
 
@@ -238,79 +238,64 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         broker_password = mqtt_entry.data.get("password", "")
 
         broker = MqttBroker(
-            broker_id="ha-button-plus",
             url=f"mqtt://{self.broker_endpoint}/",
             port=broker_port,
-            ws_port=9001,
             username=broker_username,
             password=broker_password,
         )
 
-        device_config.mqtt_brokers.append(broker)
+        device_config.set_broker(broker)
         return device_config
 
     def add_topics_to_core(
         self, device_config: DeviceConfiguration
     ) -> DeviceConfiguration:
-        device_id = device_config.info.device_id
+        device_id = device_config.identifier()
         min_version = "1.11"
 
-        if version.parse(device_config.info.firmware) < version.parse(min_version):
+        if device_config.firmware_version() < version.parse(min_version):
             _LOGGER.debug(
-                f"Current version {device_config.info.firmware} doesn't support the brightness, it must be at least firmware version {min_version}"
+                f"Current version {device_config.firmware_version()} doesn't support the brightness, it must be at least firmware version {min_version}"
             )
             return
 
-        device_config.core.topics.append(
-            {
-                "brokerid": "ha-button-plus",
-                "topic": f"buttonplus/{device_id}/brightness/large",
-                "payload": "",
-                "eventtype": EventType.BRIGHTNESS_LARGE_DISPLAY,
-            }
-        )
+        device_config.add_topic(Topic(
+            topic=f"buttonplus/{device_id}/brightness/large",
+            event_type=EventType.BRIGHTNESS_LARGE_DISPLAY,
+        ))
 
-        device_config.core.topics.append(
-            {
-                "brokerid": "ha-button-plus",
-                "topic": f"buttonplus/{device_id}/brightness/mini",
-                "payload": "",
-                "eventtype": EventType.BRIGHTNESS_MINI_DISPLAY,
-            }
-        )
+        device_config.add_topic(Topic(
+            topic=f"buttonplus/{device_id}/brightness/mini",
+            event_type=EventType.BRIGHTNESS_MINI_DISPLAY,
+        ))
 
-        device_config.core.topics.append(
-            {
-                "brokerid": "ha-button-plus",
-                "topic": f"buttonplus/{device_id}/page/status",
-                "payload": "",
-                "eventtype": EventType.PAGE_STATUS,
-            }
-        )
+        device_config.add_topic(Topic(
+            topic=f"buttonplus/{device_id}/page/status",
+            event_type=EventType.PAGE_STATUS,
+        ))
 
-        device_config.core.topics.append(
-            {
-                "brokerid": "ha-button-plus",
-                "topic": f"buttonplus/{device_id}/page/set",
-                "payload": "",
-                "eventtype": EventType.SET_PAGE,
-            }
-        )
+        device_config.add_topic(Topic(
+            topic=f"buttonplus/{device_id}/page/set",
+            event_type=EventType.SET_PAGE,
+        ))
 
     def add_topics_to_buttons(
         self, device_config: DeviceConfiguration
     ) -> DeviceConfiguration:
         device_id = device_config.info.device_id
 
-        active_connectors = [
-            connector.connector_id
-            for connector in device_config.info.connectors
-            if connector.connector_type_enum()
-            in [ConnectorEnum.DISPLAY, ConnectorEnum.BAR]
-        ]
+        active_connectors = device_config.connectors_for(
+            ConnectorType.BAR, ConnectorType.DISPLAY
+        )
 
+        # Each button should have a connector, so check if the buttons connector is present, else skip it
+        # Each connector has two buttons, and the *implicit API contract* is that connectors create buttons in
+        # ascending (and sorted) order. So connector 0 has buttons 0 and 1, connector 1 has buttons 2 and 3, etc.
+        #
+        # This means the connector ID is equal to floor(button_id / 2). Button ID's start at 0! So:
+        # button 0 and 1 are on connector 0, button 2 and 3 are on connector 1
         for button in filter(
-            lambda b: b.button_id // 2 in active_connectors, device_config.mqtt_buttons
+            lambda button: button.button_id // 2 in active_connectors, device_config.mqtt_buttons
         ):
             # Create topics for button main label
             button.topics.append(

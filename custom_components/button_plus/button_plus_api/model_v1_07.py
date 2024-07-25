@@ -1,9 +1,12 @@
 import json
-from typing import List, Dict, Any
+from typing import List, Dict, Any, MutableSet
+
+from packaging import version
+from packaging.version import Version
 
 from .connector_type import ConnectorType
 from .event_type import EventType
-from .model_interface import Button
+from .model_interface import Button, Topic as TopicInterface
 
 
 class Connector:
@@ -97,7 +100,7 @@ class Core:
         led_color_front: int,
         led_color_wall: int,
         color: int,
-        topics: List[Topic],
+        topics: MutableSet[Topic],
     ):
         self.name = name
         self.location = location
@@ -120,7 +123,7 @@ class Core:
             led_color_front=data["ledcolorfront"],
             led_color_wall=data["ledcolorwall"],
             color=data["color"],
-            topics=[Topic.from_dict(topic) for topic in data.get("topics", [])],
+            topics=MutableSet[Topic]([Topic.from_dict(topic) for topic in data.get("topics", [])]),
         )
 
 
@@ -134,7 +137,7 @@ class MqttButton(Button):
         led_color_wall: int,
         long_delay: int,
         long_repeat: int,
-        topics: List[Topic],
+        topics: MutableSet[Topic],
     ):
         self.button_id = button_id
         self.label = label
@@ -155,7 +158,7 @@ class MqttButton(Button):
             led_color_wall=data["ledcolorwall"],
             long_delay=data["longdelay"],
             long_repeat=data["longrepeat"],
-            topics=[Topic.from_dict(topic) for topic in data.get("topics", [])],
+            topics=MutableSet[Topic]([Topic.from_dict(topic) for topic in data.get("topics", [])]),
         )
 
 
@@ -170,7 +173,7 @@ class MqttDisplay:
         label: str,
         unit: str,
         round: int,
-        topics: List[Topic],
+        topics: MutableSet[Topic],
     ):
         self.x = x
         self.y = y
@@ -193,26 +196,26 @@ class MqttDisplay:
             label=data["label"],
             unit=data["unit"],
             round=data["round"],
-            topics=[Topic.from_dict(topic) for topic in data.get("topics", [])],
+            topics=MutableSet[Topic]([Topic.from_dict(topic) for topic in data.get("topics", [])]),
         )
 
 
 class MqttBroker:
     def __init__(
         self,
-        broker_id: str,
         url: str,
         port: int,
-        ws_port: int,
         username: str,
         password: str,
+        broker_id="ha-button-plus",
+        ws_port=9001,
     ):
-        self.broker_id = broker_id
         self.url = url
         self.port = port
-        self.ws_port = ws_port
         self.username = username
         self.password = password
+        self.broker_id = broker_id
+        self.ws_port = ws_port
 
     @staticmethod
     def from_dict(data: Dict[str, Any]) -> "MqttBroker":
@@ -348,8 +351,8 @@ class DeviceConfiguration:
 
         return json.dumps(self, default=serialize, indent=4)
 
-    def firmware_version(self) -> str:
-        return self.info.firmware
+    def firmware_version(self) -> Version:
+        return version.parse(self.info.firmware)
 
     def name(self) -> str:
         return self.core.name or self.info.device_id
@@ -385,3 +388,17 @@ class DeviceConfiguration:
 
     def buttons(self) -> List[Button]:
         return [button for button in self.mqtt_buttons]
+
+    def add_topic(self, topic: TopicInterface) -> None:
+        self.core.topics.add(Topic(
+            broker_id="ha-button-plus",
+            topic=topic.topic,
+            payload="",
+            event_type=topic.event_type
+        ))
+
+    def remove_topic_for(self, event_type: EventType) -> None:
+        # Remove the topic with EventType event_type
+        self.core.topics = [
+            topic for topic in self.core.topics if topic.event_type != event_type
+        ]

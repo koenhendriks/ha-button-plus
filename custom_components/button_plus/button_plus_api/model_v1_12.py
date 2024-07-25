@@ -1,9 +1,12 @@
 import json
 from typing import List, Dict, Any
 
+from packaging import version
+from packaging.version import Version
+
 from .connector_type import ConnectorType
 from .model_interface import Button
-from .model_v1_07 import Connector, Sensor, Topic, MqttButton, MqttBroker, MqttSensor
+from .model_v1_07 import Connector, Sensor, Topic, MqttButton, MqttBroker, MqttSensor, DeviceConfiguration as DeviceConfiguration_v1_07
 
 
 class Info:
@@ -116,7 +119,7 @@ class MqttDisplay:
         )
 
 
-class DeviceConfiguration:
+class DeviceConfiguration(DeviceConfiguration_v1_07):
     def __init__(
         self,
         info: Info,
@@ -249,40 +252,5 @@ class DeviceConfiguration:
 
         return json.dumps(self, default=serialize)
 
-    def firmware_version(self) -> str:
-        return self.info.firmware
-
-    def name(self) -> str:
-        return self.core.name or self.info.device_id
-
-    def identifier(self) -> str:
-        return self.info.device_id
-
-    def ip_address(self) -> str:
-        return self.info.ip_address
-
-    def mac_address(self) -> str:
-        return self.info.mac
-
-    def location(self) -> str:
-        return self.core.location
-
-    def connector_for(self, *identifier: int) -> Connector:
-        return next(
-            (
-                connector
-                for connector in self.info.connectors
-                if connector.identifier == identifier
-            ),
-            None,
-        )
-
-    def connectors_for(self, *connector_type: ConnectorType) -> List[Connector]:
-        return [
-            connector
-            for connector in self.info.connectors
-            if connector.connector_type in [connector_type]
-        ]
-
-    def buttons(self) -> List[Button]:
-        return [button for button in self.mqtt_buttons]
+    def firmware_version(self) -> Version:
+        return version.parse(self.info.firmware)
