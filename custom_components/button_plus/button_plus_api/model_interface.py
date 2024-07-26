@@ -21,6 +21,7 @@ class Button:
         """Return the identifier of the connector."""
         pass
 
+
 class Topic:
     topic: str
     event_type: EventType
@@ -87,4 +88,3 @@ class DeviceConfiguration:
     def to_json(self) -> str:
         """Serialize the DeviceConfiguration to a JSON string."""
         pass
-

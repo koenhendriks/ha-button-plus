@@ -38,8 +38,8 @@ class ButtonPlusHub:
         self.top_label_entities = {}
         self.brightness_entities = {}
 
-        self.manufacturer=MANUFACTURER
-        self.model="Base Module"
+        self.manufacturer = MANUFACTURER
+        self.model = "Base Module"
 
         device_registry = dr.async_get(hass)
 

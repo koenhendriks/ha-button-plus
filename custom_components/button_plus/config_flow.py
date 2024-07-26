@@ -95,7 +95,9 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         ip, aiohttp_client.async_get_clientsession(self.hass)
                     )
                     json_config = await api_client.fetch_config()
-                    device_config: DeviceConfiguration = ModelDetection.model_for_json(json_config)
+                    device_config: DeviceConfiguration = ModelDetection.model_for_json(
+                        json_config
+                    )
 
                     self.set_broker(device_config)
                     self.add_topics(device_config)
@@ -231,9 +233,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         except ValueError:
             return False
 
-    def set_broker(
-        self, device_config: DeviceConfiguration
-    ):
+    def set_broker(self, device_config: DeviceConfiguration):
         mqtt_entry = self.mqtt_entry
         broker_port = mqtt_entry.data.get("port")
         broker_username = mqtt_entry.data.get("username", "")
@@ -247,9 +247,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         )
 
     @staticmethod
-    def add_topics(
-        device_config: DeviceConfiguration
-    ) -> DeviceConfiguration:
+    def add_topics(device_config: DeviceConfiguration) -> DeviceConfiguration:
         device_id = device_config.identifier()
 
         if device_config.supports_brightness() is False:
@@ -258,20 +256,27 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             )
             return
 
-        device_config.add_topic(f"buttonplus/{device_id}/brightness/large", EventType.BRIGHTNESS_LARGE_DISPLAY)
-        device_config.add_topic(f"buttonplus/{device_id}/brightness/mini", EventType.BRIGHTNESS_MINI_DISPLAY)
-        device_config.add_topic(f"buttonplus/{device_id}/page/status", EventType.PAGE_STATUS)
+        device_config.add_topic(
+            f"buttonplus/{device_id}/brightness/large",
+            EventType.BRIGHTNESS_LARGE_DISPLAY,
+        )
+        device_config.add_topic(
+            f"buttonplus/{device_id}/brightness/mini", EventType.BRIGHTNESS_MINI_DISPLAY
+        )
+        device_config.add_topic(
+            f"buttonplus/{device_id}/page/status", EventType.PAGE_STATUS
+        )
         device_config.add_topic(f"buttonplus/{device_id}/page/set", EventType.SET_PAGE)
 
     @staticmethod
-    def add_topics_to_buttons(
-        device_config: DeviceConfiguration
-    ):
+    def add_topics_to_buttons(device_config: DeviceConfiguration):
         device_id = device_config.identifier()
 
         active_connectors = [
             connector.identifier()
-            for connector in device_config.connectors_for(ConnectorType.BAR, ConnectorType.DISPLAY)
+            for connector in device_config.connectors_for(
+                ConnectorType.BAR, ConnectorType.DISPLAY
+            )
         ]
 
         # Each button should have a connector, so check if the buttons connector is present, else skip it

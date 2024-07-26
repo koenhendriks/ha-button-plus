@@ -39,7 +39,7 @@ async def async_setup_entry(
 
 class ButtonPlusLight(LightEntity):
     def __init__(self, btn_id: int, hub: ButtonPlusHub, light_type: str):
-        connectors=hub.config.connectors_for(ConnectorType.DISPLAY, ConnectorType.BAR)
+        connectors = hub.config.connectors_for(ConnectorType.DISPLAY, ConnectorType.BAR)
         self._btn_id = btn_id
         self._hub = hub
         self._hub_id = hub.hub_id
