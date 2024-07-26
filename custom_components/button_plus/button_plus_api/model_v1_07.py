@@ -26,7 +26,7 @@ class Connector:
         return Connector(identifier=data["id"], connector_type=data["type"])
 
     def to_dict(self) -> Dict[str, Any]:
-        return {"id": self.identifier, "type": self.connector_type}
+        return {"id": self._identifier, "type": self.connector_type}
 
 
 class Sensor:
