@@ -13,8 +13,8 @@ from homeassistant import config_entries
 from homeassistant.const import CONF_IP_ADDRESS, CONF_EMAIL, CONF_PASSWORD
 from homeassistant.helpers import aiohttp_client
 from homeassistant.helpers.network import get_url
-from packaging import version
 
+from . import ModelDetection
 from .button_plus_api.api_client import ApiClient
 from .button_plus_api.local_api_client import LocalApiClient
 from .button_plus_api.model_interface import (
@@ -97,12 +97,10 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         ip, aiohttp_client.async_get_clientsession(self.hass)
                     )
                     json_config = await api_client.fetch_config()
-                    device_config: DeviceConfiguration = DeviceConfiguration.from_json(
-                        json_config
-                    )
+                    device_config: DeviceConfiguration = ModelDetection.model_for_json(json.loads(json_config))
 
-                    self.add_broker_to_config(device_config)
-                    self.add_topics_to_core(device_config)
+                    self.set_broker(device_config)
+                    self.add_topics(device_config)
                     self.add_topics_to_buttons(device_config)
 
                     await api_client.push_config(device_config)
@@ -227,14 +225,15 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         return ApiClient(aiohttp_client.async_get_clientsession(self.hass), cookie)
 
-    def validate_ip(self, ip) -> bool:
+    @staticmethod
+    def validate_ip(ip) -> bool:
         try:
             ipaddress.IPv4Address(ip)
             return True
         except ValueError:
             return False
 
-    def add_broker_to_config(
+    def set_broker(
         self, device_config: DeviceConfiguration
     ) -> DeviceConfiguration:
         mqtt_entry = self.mqtt_entry
@@ -252,8 +251,9 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         device_config.set_broker(broker)
         return device_config
 
-    def add_topics_to_core(
-        self, device_config: DeviceConfiguration
+    @staticmethod
+    def add_topics(
+        device_config: DeviceConfiguration
     ) -> DeviceConfiguration:
         device_id = device_config.identifier()
 
@@ -291,10 +291,11 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             )
         )
 
+    @staticmethod
     def add_topics_to_buttons(
-        self, device_config: DeviceConfiguration
+        device_config: DeviceConfiguration
     ) -> DeviceConfiguration:
-        device_id = device_config.info.device_id
+        device_id = device_config.identifier()
 
         active_connectors = device_config.connectors_for(
             ConnectorType.BAR, ConnectorType.DISPLAY
@@ -307,8 +308,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         # This means the connector ID is equal to floor(button_id / 2). Button ID's start at 0! So:
         # button 0 and 1 are on connector 0, button 2 and 3 are on connector 1
         for button in filter(
-            lambda button: button.button_id // 2 in active_connectors,
-            device_config.mqtt_buttons,
+            lambda btn: btn.button_id // 2 in active_connectors,
+            device_config.buttons(),
         ):
             # Create topics for button main label
             button.topics.append(
@@ -353,7 +354,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return device_config
 
     def get_mqtt_endpoint(self, endpoint: str) -> str:
-        # Internal add-on is not reachable from the Button+ device so we use the hass ip
+        # Internal add-on is not reachable from the Button+ device, so we use the hass ip
         if endpoint in self.local_brokers:
             _LOGGER.debug(
                 f"mqtt host is internal so use {self.hass.config.api.host} instead of {endpoint}"
