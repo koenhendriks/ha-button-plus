@@ -233,7 +233,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     def set_broker(
         self, device_config: DeviceConfiguration
-    ) -> DeviceConfiguration:
+    ):
         mqtt_entry = self.mqtt_entry
         broker_port = mqtt_entry.data.get("port")
         broker_username = mqtt_entry.data.get("username", "")
@@ -266,12 +266,13 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     @staticmethod
     def add_topics_to_buttons(
         device_config: DeviceConfiguration
-    ) -> DeviceConfiguration:
+    ):
         device_id = device_config.identifier()
 
-        active_connectors = device_config.connectors_for(
-            ConnectorType.BAR, ConnectorType.DISPLAY
-        )
+        active_connectors = [
+            connector.identifier()
+            for connector in device_config.connectors_for(ConnectorType.BAR, ConnectorType.DISPLAY)
+        ]
 
         # Each button should have a connector, so check if the buttons connector is present, else skip it
         # Each connector has two buttons, and the *implicit API contract* is that connectors create buttons in

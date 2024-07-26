@@ -85,7 +85,7 @@ class ButtonPlusButton(ButtonEntity):
         self._name = f"Button {btn_id}"
         self._device_class = ButtonDeviceClass.IDENTIFY
         self._connector: Connector = hub.config.connector_for(btn_id // 2)
-        self._attr_unique_id = self.unique_id_gen()
+        self.unique_id = self.unique_id_gen()
 
     def unique_id_gen(self):
         match self._connector.connector_type():
@@ -143,6 +143,7 @@ class ButtonPlusButton(ButtonEntity):
         await super()._async_press_action()
 
     async def _async_release_action(self) -> None:
+        # Not implemented
         pass
 
     @property

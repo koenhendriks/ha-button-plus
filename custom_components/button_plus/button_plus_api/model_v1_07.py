@@ -12,11 +12,11 @@ from .model_interface import Button, Topic as TopicInterface
 
 class Connector:
     def __init__(self, identifier: int, connector_type: int):
-        self.identifier = identifier
+        self._identifier = identifier
         self.connector_type = connector_type
 
     def identifier(self) -> int:
-        return self.identifier
+        return self._identifier
 
     def connector_type(self) -> ConnectorType:
         return ConnectorType(self.connector_type)
@@ -373,7 +373,7 @@ class DeviceConfiguration:
             (
                 connector
                 for connector in self.info.connectors
-                if connector.identifier == identifier
+                if connector.identifier() == identifier
             ),
             None,
         )
