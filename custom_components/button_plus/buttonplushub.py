@@ -52,7 +52,7 @@ class ButtonPlusHub:
             suggested_area=self.config.location(),
             name=self._name,
             model=self.model,
-            sw_version=config.firmware_version(),
+            sw_version=str(config.firmware_version()),
         )
 
         # 1 or none display module

@@ -87,8 +87,8 @@ class Info:
         }
 
 
-class Topic:
-    def __init__(self, broker_id: str, topic: str, payload: str, event_type: int):
+class Topic(TopicInterface):
+    def __init__(self, broker_id: str, topic: str, payload: str, event_type: EventType):
         self.broker_id = broker_id
         self.topic = topic
         self.payload = payload
@@ -388,13 +388,16 @@ class DeviceConfiguration:
     def buttons(self) -> List[Button]:
         return [button for button in self.mqtt_buttons]
 
-    def add_topic(self, topic: TopicInterface) -> None:
-        self.core.topics.add(
+    def set_broker(self, url: str, port: int, username: str, password: str) -> None:
+        self.mqtt_brokers.append(MqttBroker(url, port, username, password))
+
+    def add_topic(self, topic: str, event_type: EventType) -> None:
+        self.core.topics.append(
             Topic(
                 broker_id="ha-button-plus",
-                topic=topic.topic,
+                topic=topic,
                 payload="",
-                event_type=topic.event_type,
+                event_type=event_type,
             )
         )
 

@@ -20,8 +20,6 @@ from .button_plus_api.local_api_client import LocalApiClient
 from .button_plus_api.model_interface import (
     ConnectorType,
     DeviceConfiguration,
-    MqttBroker,
-    Topic,
 )
 from .button_plus_api.event_type import EventType
 from .const import DOMAIN
@@ -97,7 +95,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         ip, aiohttp_client.async_get_clientsession(self.hass)
                     )
                     json_config = await api_client.fetch_config()
-                    device_config: DeviceConfiguration = ModelDetection.model_for_json(json.loads(json_config))
+                    device_config: DeviceConfiguration = ModelDetection.model_for_json(json_config)
 
                     self.set_broker(device_config)
                     self.add_topics(device_config)
@@ -241,15 +239,12 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         broker_username = mqtt_entry.data.get("username", "")
         broker_password = mqtt_entry.data.get("password", "")
 
-        broker = MqttBroker(
-            url=f"mqtt://{self.broker_endpoint}/",
-            port=broker_port,
-            username=broker_username,
-            password=broker_password,
+        device_config.set_broker(
+            f"mqtt://{self.broker_endpoint}/",
+            broker_port,
+            broker_username,
+            broker_password,
         )
-
-        device_config.set_broker(broker)
-        return device_config
 
     @staticmethod
     def add_topics(
@@ -263,33 +258,10 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             )
             return
 
-        device_config.add_topic(
-            Topic(
-                topic=f"buttonplus/{device_id}/brightness/large",
-                event_type=EventType.BRIGHTNESS_LARGE_DISPLAY,
-            )
-        )
-
-        device_config.add_topic(
-            Topic(
-                topic=f"buttonplus/{device_id}/brightness/mini",
-                event_type=EventType.BRIGHTNESS_MINI_DISPLAY,
-            )
-        )
-
-        device_config.add_topic(
-            Topic(
-                topic=f"buttonplus/{device_id}/page/status",
-                event_type=EventType.PAGE_STATUS,
-            )
-        )
-
-        device_config.add_topic(
-            Topic(
-                topic=f"buttonplus/{device_id}/page/set",
-                event_type=EventType.SET_PAGE,
-            )
-        )
+        device_config.add_topic(f"buttonplus/{device_id}/brightness/large", EventType.BRIGHTNESS_LARGE_DISPLAY)
+        device_config.add_topic(f"buttonplus/{device_id}/brightness/mini", EventType.BRIGHTNESS_MINI_DISPLAY)
+        device_config.add_topic(f"buttonplus/{device_id}/page/status", EventType.PAGE_STATUS)
+        device_config.add_topic(f"buttonplus/{device_id}/page/set", EventType.SET_PAGE)
 
     @staticmethod
     def add_topics_to_buttons(
@@ -350,8 +322,6 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     "eventtype": EventType.LONG_PRESS,
                 }
             )
-
-        return device_config
 
     def get_mqtt_endpoint(self, endpoint: str) -> str:
         # Internal add-on is not reachable from the Button+ device, so we use the hass ip

@@ -10,7 +10,6 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.components.mqtt import client as mqtt
-from packaging import version
 from .button_plus_api.event_type import EventType
 from . import ButtonPlusHub
 

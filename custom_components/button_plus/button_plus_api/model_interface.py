@@ -21,35 +21,9 @@ class Button:
         """Return the identifier of the connector."""
         pass
 
-
-class MqttBroker:
-    url: str
-    port: int
-    username: str
-    password: str
-
-    def __init__(
-        self,
-        url: str,
-        port: int,
-        username: str,
-        password: str,
-    ):
-        """Initialize the MQTT broker."""
-        pass
-
-
 class Topic:
     topic: str
     event_type: EventType
-
-    def __init__(
-        self,
-        topic: str,
-        event_type: EventType,
-    ):
-        """Initialize the MQTT topic."""
-        pass
 
 
 class DeviceConfiguration:
@@ -93,15 +67,11 @@ class DeviceConfiguration:
         """Return the available buttons."""
         pass
 
-    def get_broker(self) -> MqttBroker:
-        """Return the MQTT broker."""
-        pass
-
-    def set_broker(self, broker: MqttBroker) -> None:
+    def set_broker(self, url: str, port: int, username: str, password: str) -> None:
         """Set the MQTT broker."""
         pass
 
-    def add_topic(self, topic: Topic) -> None:
+    def add_topic(self, topic: str, event_type: EventType) -> None:
         """Set the MQTT topic."""
         pass
 
