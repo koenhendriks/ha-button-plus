@@ -64,6 +64,10 @@ class DeviceConfiguration:
         """Return the connectors of the given type."""
         pass
 
+    def connectors(self) -> List[Connector]:
+        """Return the connectors of the given type."""
+        pass
+
     def buttons(self) -> List[Button]:
         """Return the available buttons."""
         pass

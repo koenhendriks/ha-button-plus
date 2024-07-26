@@ -385,6 +385,9 @@ class DeviceConfiguration:
             if connector.connector_type in [connector_type]
         ]
 
+    def connectors(self) -> List[Connector]:
+        return self.info.connectors
+
     def buttons(self) -> List[Button]:
         return [button for button in self.mqtt_buttons]
 
