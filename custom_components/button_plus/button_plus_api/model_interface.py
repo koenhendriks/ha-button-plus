@@ -29,11 +29,11 @@ class MqttBroker:
     password: str
 
     def __init__(
-            self,
-            url: str,
-            port: int,
-            username: str,
-            password: str,
+        self,
+        url: str,
+        port: int,
+        username: str,
+        password: str,
     ):
         """Initialize the MQTT broker."""
         pass
@@ -44,26 +44,21 @@ class Topic:
     event_type: EventType
 
     def __init__(
-            self,
-            topic: str,
-            event_type: EventType,
+        self,
+        topic: str,
+        event_type: EventType,
     ):
         """Initialize the MQTT topic."""
         pass
 
 
 class DeviceConfiguration:
-    @staticmethod
-    def from_dict(json_data: any) -> "DeviceConfiguration":
-        """Deserialize the DeviceConfiguration from a dictionary."""
-        pass
-
-    def to_json(self) -> str:
-        """Serialize the DeviceConfiguration to a JSON string."""
-        pass
-
     def firmware_version(self) -> Version:
         """Return the firmware version of the device."""
+        pass
+
+    def supports_brightness(self) -> bool:
+        """Return if the device supports brightness."""
         pass
 
     def name(self) -> str:
@@ -113,3 +108,13 @@ class DeviceConfiguration:
     def remove_topic_for(self, event_type: EventType) -> None:
         """Remove the MQTT topic."""
         pass
+
+    @staticmethod
+    def from_dict(json_data: any) -> "DeviceConfiguration":
+        """Deserialize the DeviceConfiguration from a dictionary."""
+        pass
+
+    def to_json(self) -> str:
+        """Serialize the DeviceConfiguration to a JSON string."""
+        pass
+

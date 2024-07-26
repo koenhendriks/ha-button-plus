@@ -38,6 +38,9 @@ class ButtonPlusHub:
         self.top_label_entities = {}
         self.brightness_entities = {}
 
+        self.manufacturer=MANUFACTURER
+        self.model="Base Module"
+
         device_registry = dr.async_get(hass)
 
         self.device = device_registry.async_get_or_create(
@@ -45,10 +48,10 @@ class ButtonPlusHub:
             config_entry_id=entry.entry_id,
             connections={(dr.CONNECTION_NETWORK_MAC, self.config.mac_address())},
             identifiers={(DOMAIN, self.config.identifier())},
-            manufacturer=MANUFACTURER,
+            manufacturer=self.manufacturer,
             suggested_area=self.config.location(),
             name=self._name,
-            model="Base Module",
+            model=self.model,
             sw_version=config.firmware_version(),
         )
 
@@ -102,7 +105,7 @@ class ButtonPlusHub:
             model="Bar module",
             manufacturer=MANUFACTURER,
             suggested_area=hub.config.location(),
-            identifiers={(DOMAIN, f"{hub.identifier} BAR Module {connector_id}")},
+            identifiers={(DOMAIN, f"{hub.hub} BAR Module {connector_id}")},
             via_device=(DOMAIN, hub.hub_id),
         )
 

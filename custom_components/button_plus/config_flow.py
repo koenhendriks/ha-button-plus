@@ -17,7 +17,12 @@ from packaging import version
 
 from .button_plus_api.api_client import ApiClient
 from .button_plus_api.local_api_client import LocalApiClient
-from .button_plus_api.model_interface import ConnectorType, DeviceConfiguration, MqttBroker, Topic
+from .button_plus_api.model_interface import (
+    ConnectorType,
+    DeviceConfiguration,
+    MqttBroker,
+    Topic,
+)
 from .button_plus_api.event_type import EventType
 from .const import DOMAIN
 
@@ -251,33 +256,40 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self, device_config: DeviceConfiguration
     ) -> DeviceConfiguration:
         device_id = device_config.identifier()
-        min_version = "1.11"
 
-        if device_config.firmware_version() < version.parse(min_version):
-            _LOGGER.debug(
-                f"Current version {device_config.firmware_version()} doesn't support the brightness, it must be at least firmware version {min_version}"
+        if device_config.supports_brightness() is False:
+            _LOGGER.info(
+                "Current firmware version doesn't support brightness settings, it must be at least firmware version 1.11"
             )
             return
 
-        device_config.add_topic(Topic(
-            topic=f"buttonplus/{device_id}/brightness/large",
-            event_type=EventType.BRIGHTNESS_LARGE_DISPLAY,
-        ))
+        device_config.add_topic(
+            Topic(
+                topic=f"buttonplus/{device_id}/brightness/large",
+                event_type=EventType.BRIGHTNESS_LARGE_DISPLAY,
+            )
+        )
 
-        device_config.add_topic(Topic(
-            topic=f"buttonplus/{device_id}/brightness/mini",
-            event_type=EventType.BRIGHTNESS_MINI_DISPLAY,
-        ))
+        device_config.add_topic(
+            Topic(
+                topic=f"buttonplus/{device_id}/brightness/mini",
+                event_type=EventType.BRIGHTNESS_MINI_DISPLAY,
+            )
+        )
 
-        device_config.add_topic(Topic(
-            topic=f"buttonplus/{device_id}/page/status",
-            event_type=EventType.PAGE_STATUS,
-        ))
+        device_config.add_topic(
+            Topic(
+                topic=f"buttonplus/{device_id}/page/status",
+                event_type=EventType.PAGE_STATUS,
+            )
+        )
 
-        device_config.add_topic(Topic(
-            topic=f"buttonplus/{device_id}/page/set",
-            event_type=EventType.SET_PAGE,
-        ))
+        device_config.add_topic(
+            Topic(
+                topic=f"buttonplus/{device_id}/page/set",
+                event_type=EventType.SET_PAGE,
+            )
+        )
 
     def add_topics_to_buttons(
         self, device_config: DeviceConfiguration
@@ -295,7 +307,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         # This means the connector ID is equal to floor(button_id / 2). Button ID's start at 0! So:
         # button 0 and 1 are on connector 0, button 2 and 3 are on connector 1
         for button in filter(
-            lambda button: button.button_id // 2 in active_connectors, device_config.mqtt_buttons
+            lambda button: button.button_id // 2 in active_connectors,
+            device_config.mqtt_buttons,
         ):
             # Create topics for button main label
             button.topics.append(

@@ -163,7 +163,11 @@ class Core:
             "ledcolorwall": self.led_color_wall,
             "color": self.color,
             # Only the Core object does not include the key when this list is empty (-:
-            **({"topics": [topic.to_dict() for topic in self.topics]} if len(self.topics) > 0 else {})
+            **(
+                {"topics": [topic.to_dict() for topic in self.topics]}
+                if len(self.topics) > 0
+                else {}
+            ),
         }
 
 
@@ -300,7 +304,7 @@ class MqttBroker:
             "port": self.port,
             "wsport": self.ws_port,
             "username": self.username,
-            "password": self.password
+            "password": self.password,
         }
 
 
@@ -346,6 +350,9 @@ class DeviceConfiguration:
     def firmware_version(self) -> Version:
         return version.parse(self.info.firmware)
 
+    def supports_brightness(self) -> bool:
+        return self.firmware_version() >= version.parse("1.11")
+
     def name(self) -> str:
         return self.core.name or self.info.device_id
 
@@ -382,12 +389,14 @@ class DeviceConfiguration:
         return [button for button in self.mqtt_buttons]
 
     def add_topic(self, topic: TopicInterface) -> None:
-        self.core.topics.add(Topic(
-            broker_id="ha-button-plus",
-            topic=topic.topic,
-            payload="",
-            event_type=topic.event_type
-        ))
+        self.core.topics.add(
+            Topic(
+                broker_id="ha-button-plus",
+                topic=topic.topic,
+                payload="",
+                event_type=topic.event_type,
+            )
+        )
 
     def remove_topic_for(self, event_type: EventType) -> None:
         # Remove the topic with EventType event_type

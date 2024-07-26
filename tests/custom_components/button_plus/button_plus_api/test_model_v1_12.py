@@ -18,7 +18,6 @@ def test_model_v1_12_from_to_json_should_be_same():
 
     # Parse the JSON data into a DeviceConfiguration object
     new_json_data = json.loads(new_json_string)
-    new_device_config = DeviceConfiguration.from_dict(new_json_data)
 
     # Assert that the JSON data is the same
     assert json_data == new_json_data

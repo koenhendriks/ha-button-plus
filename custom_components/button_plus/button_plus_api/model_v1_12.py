@@ -1,12 +1,12 @@
-import json
 from typing import List, Dict, Any
 from .model_v1_07 import (
     Connector,
     Sensor,
-    Topic, MqttButton,
+    Topic,
+    MqttButton,
     MqttBroker,
     MqttSensor,
-    DeviceConfiguration as DeviceConfiguration_v1_07
+    DeviceConfiguration as DeviceConfiguration_v1_07,
 )
 
 
