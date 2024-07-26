@@ -5,6 +5,24 @@ from custom_components.button_plus.button_plus_api.model_v1_07 import (
     DeviceConfiguration,
 )
 
+def test_model_v1_07_from_to_json_should_be_same():
+    # Load the JSON file
+    with open("resource/physicalconfig1.07.json") as file:
+        json_string = file.read()
+        json_data = json.loads(json_string)
+
+    # Parse the JSON data into a DeviceConfiguration object
+    device_config = DeviceConfiguration.from_dict(json_data)
+
+    # Serialize the DeviceConfiguration object back into a JSON string
+    new_json_string = device_config.to_json()
+
+    # Parse the JSON data into a DeviceConfiguration object
+    new_json_data = json.loads(new_json_string)
+    new_device_config = DeviceConfiguration.from_dict(new_json_data)
+
+    # Assert that the JSON data is the same
+    assert json_data == new_json_data
 
 @pytest.fixture
 def device_config():
@@ -12,7 +30,7 @@ def device_config():
     with open("resource/physicalconfig1.07.json") as file:
         json_data = json.loads(file.read())
         # Parse the JSON data into a DeviceConfiguration object
-        return DeviceConfiguration.from_json(json_data)
+        return DeviceConfiguration.from_dict(json_data)
 
 
 def test_buttons(device_config):

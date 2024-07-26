@@ -2,7 +2,7 @@ from typing import List
 
 from packaging.version import Version
 
-from button_plus.button_plus_api.event_type import EventType
+from custom_components.button_plus.button_plus_api.event_type import EventType
 from custom_components.button_plus.button_plus_api.connector_type import ConnectorType
 
 
@@ -54,8 +54,8 @@ class Topic:
 
 class DeviceConfiguration:
     @staticmethod
-    def from_json(json_data: str) -> "DeviceConfiguration":
-        """Deserialize the DeviceConfiguration from a JSON string."""
+    def from_dict(json_data: any) -> "DeviceConfiguration":
+        """Deserialize the DeviceConfiguration from a dictionary."""
         pass
 
     def to_json(self) -> str:

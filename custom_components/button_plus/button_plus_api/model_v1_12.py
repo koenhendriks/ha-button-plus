@@ -1,12 +1,13 @@
 import json
 from typing import List, Dict, Any
-
-from packaging import version
-from packaging.version import Version
-
-from .connector_type import ConnectorType
-from .model_interface import Button
-from .model_v1_07 import Connector, Sensor, Topic, MqttButton, MqttBroker, MqttSensor, DeviceConfiguration as DeviceConfiguration_v1_07
+from .model_v1_07 import (
+    Connector,
+    Sensor,
+    Topic, MqttButton,
+    MqttBroker,
+    MqttSensor,
+    DeviceConfiguration as DeviceConfiguration_v1_07
+)
 
 
 class Info:
@@ -42,6 +43,17 @@ class Info:
             sensors=[Sensor.from_dict(sensor) for sensor in data["sensors"]],
         )
 
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "id": self.device_id,
+            "mac": self.mac,
+            "ipaddress": self.ip_address,
+            "firmware": self.firmware,
+            "largedisplay": self.large_display,
+            "connectors": [connector.to_dict() for connector in self.connectors],
+            "sensors": [sensor.to_dict() for sensor in self.sensors],
+        }
+
 
 class Core:
     def __init__(
@@ -73,6 +85,17 @@ class Core:
             statusbar=data["statusbar"],
             topics=[Topic.from_dict(topic) for topic in data["topics"]],
         )
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "name": self.name,
+            "location": self.location,
+            "autobackup": self.auto_backup,
+            "brightness": self.brightness,
+            "color": self.color,
+            "statusbar": self.statusbar,
+            "topics": [topic.to_dict() for topic in self.topics],
+        }
 
 
 class MqttDisplay:
@@ -118,8 +141,24 @@ class MqttDisplay:
             topics=[Topic.from_dict(topic) for topic in data["topics"]],
         )
 
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "x": self.x,
+            "y": self.y,
+            "boxtype": self.box_type,
+            "fontsize": self.font_size,
+            "align": self.align,
+            "width": self.width,
+            "label": self.label,
+            "unit": self.unit,
+            "round": self.round,
+            "page": self.page,
+            "topics": [topic.to_dict() for topic in self.topics],
+        }
+
 
 class DeviceConfiguration(DeviceConfiguration_v1_07):
+    # Info, Core and MqttDisplay are different, so we need to redefine those
     def __init__(
         self,
         info: Info,
@@ -136,8 +175,9 @@ class DeviceConfiguration(DeviceConfiguration_v1_07):
         self.mqtt_brokers = mqtt_brokers
         self.mqtt_sensors = mqtt_sensors
 
+    # Same here, use the new classes for Info, Core and MqttDisplay
     @staticmethod
-    def from_json(json_data: any) -> "DeviceConfiguration":
+    def from_dict(json_data: any) -> "DeviceConfiguration":
         return DeviceConfiguration(
             info=Info.from_dict(json_data["info"]),
             core=Core.from_dict(json_data["core"]),
@@ -154,103 +194,3 @@ class DeviceConfiguration(DeviceConfiguration_v1_07):
                 MqttSensor.from_dict(sensor) for sensor in json_data["mqttsensors"]
             ],
         )
-
-    def to_json(self) -> str:
-        def serialize(obj):
-            if hasattr(obj, "__dict__"):
-                d = obj.__dict__.copy()
-
-                if isinstance(obj, DeviceConfiguration):
-                    d["info"] = serialize(d.pop("info"))
-                    d["core"] = serialize(d.pop("core"))
-                    d["mqttbuttons"] = [
-                        serialize(button) for button in d.pop("mqtt_buttons")
-                    ]
-                    d["mqttdisplays"] = [
-                        serialize(display) for display in d.pop("mqtt_displays")
-                    ]
-                    d["mqttbrokers"] = [
-                        serialize(broker) for broker in d.pop("mqtt_brokers")
-                    ]
-                    d["mqttsensors"] = [
-                        serialize(sensor) for sensor in d.pop("mqtt_sensors")
-                    ]
-
-                if isinstance(obj, Info):
-                    d["id"] = d.pop("device_id")
-                    d["mac"] = d.pop("mac")
-                    d["ipaddress"] = d.pop("ip_address")
-                    d["firmware"] = d.pop("firmware")
-                    d["largedisplay"] = d.pop("large_display")
-                    d["connectors"] = [
-                        serialize(connector) for connector in d.pop("connectors")
-                    ]
-                    d["sensors"] = [serialize(sensor) for sensor in d.pop("sensors")]
-
-                elif isinstance(obj, Connector):
-                    d["id"] = d.pop("identifier")
-                    d["type"] = d.pop("connector_type")
-
-                elif isinstance(obj, Sensor):
-                    d["sensorid"] = d.pop("sensor_id")
-                    d["description"] = d.pop("description")
-
-                elif isinstance(obj, Core):
-                    d["name"] = d.pop("name")
-                    d["location"] = d.pop("location")
-                    d["autobackup"] = d.pop("auto_backup")
-                    d["brightness"] = d.pop("brightness")
-                    d["color"] = d.pop("color")
-                    d["statusbar"] = d.pop("statusbar")
-                    d["topics"] = [serialize(topic) for topic in d.pop("topics")]
-
-                elif isinstance(obj, MqttButton):
-                    d["id"] = d.pop("button_id")
-                    d["label"] = d.pop("label")
-                    d["toplabel"] = d.pop("top_label")
-                    d["ledcolorfront"] = d.pop("led_color_front")
-                    d["ledcolorwall"] = d.pop("led_color_wall")
-                    d["longdelay"] = d.pop("long_delay")
-                    d["longrepeat"] = d.pop("long_repeat")
-                    d["topics"] = [serialize(topic) for topic in d.pop("topics")]
-
-                elif isinstance(obj, Topic):
-                    d["brokerid"] = d.pop("broker_id")
-                    d["topic"] = d.pop("topic")
-                    d["payload"] = d.pop("payload")
-                    d["eventtype"] = d.pop("event_type")
-
-                elif isinstance(obj, MqttDisplay):
-                    d["x"] = d.pop("x")
-                    d["y"] = d.pop("y")
-                    d["boxtype"] = d.pop("box_type")
-                    d["fontsize"] = d.pop("font_size")
-                    d["align"] = d.pop("align")
-                    d["width"] = d.pop("width")
-                    d["label"] = d.pop("label")
-                    d["unit"] = d.pop("unit")
-                    d["round"] = d.pop("round")
-                    d["page"] = d.pop("page")
-                    d["topics"] = [serialize(topic) for topic in d.pop("topics")]
-
-                elif isinstance(obj, MqttBroker):
-                    d["brokerid"] = d.pop("broker_id")
-                    d["url"] = d.pop("url")
-                    d["port"] = d.pop("port")
-                    d["wsport"] = d.pop("ws_port")
-                    d["username"] = d.pop("username")
-                    d["password"] = d.pop("password")
-
-                elif isinstance(obj, MqttSensor):
-                    d["sensorid"] = d.pop("sensor_id")
-                    d["interval"] = d.pop("interval")
-                    d["topic"] = serialize(d["topic"])
-
-                return {k: v for k, v in d.items() if v is not None}
-            else:
-                return str(obj)
-
-        return json.dumps(self, default=serialize)
-
-    def firmware_version(self) -> Version:
-        return version.parse(self.info.firmware)
