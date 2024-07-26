@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict, Any
 
 from packaging.version import Version
 
@@ -85,7 +85,7 @@ class DeviceConfiguration:
         pass
 
     @staticmethod
-    def from_dict(json_data: any) -> "DeviceConfiguration":
+    def from_dict(data: Dict[str, Any]) -> "DeviceConfiguration":
         """Deserialize the DeviceConfiguration from a dictionary."""
         pass
 

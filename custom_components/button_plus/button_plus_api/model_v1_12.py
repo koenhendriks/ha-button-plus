@@ -177,20 +177,20 @@ class DeviceConfiguration(DeviceConfiguration_v1_07):
 
     # Same here, use the new classes for Info, Core and MqttDisplay
     @staticmethod
-    def from_dict(json_data: any) -> "DeviceConfiguration":
+    def from_dict(data: Dict[str, Any]) -> "DeviceConfiguration":
         return DeviceConfiguration(
-            info=Info.from_dict(json_data["info"]),
-            core=Core.from_dict(json_data["core"]),
+            info=Info.from_dict(data["info"]),
+            core=Core.from_dict(data["core"]),
             mqtt_buttons=[
-                MqttButton.from_dict(button) for button in json_data["mqttbuttons"]
+                MqttButton.from_dict(button) for button in data["mqttbuttons"]
             ],
             mqtt_displays=[
-                MqttDisplay.from_dict(display) for display in json_data["mqttdisplays"]
+                MqttDisplay.from_dict(display) for display in data["mqttdisplays"]
             ],
             mqtt_brokers=[
-                MqttBroker.from_dict(broker) for broker in json_data["mqttbrokers"]
+                MqttBroker.from_dict(broker) for broker in data["mqttbrokers"]
             ],
             mqtt_sensors=[
-                MqttSensor.from_dict(sensor) for sensor in json_data["mqttsensors"]
+                MqttSensor.from_dict(sensor) for sensor in data["mqttsensors"]
             ],
         )

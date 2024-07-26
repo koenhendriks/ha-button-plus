@@ -7,13 +7,13 @@ from packaging.version import Version
 from .JSONCustomEncoder import CustomEncoder
 from .connector_type import ConnectorType
 from .event_type import EventType
-from .model_interface import Button, Topic as TopicInterface
+from .model_interface import Button
 
 
 class Connector:
     def __init__(self, identifier: int, connector_type: int):
         self._identifier = identifier
-        self.connector_type = connector_type
+        self._connector_type = connector_type
 
     def identifier(self) -> int:
         return self._identifier
@@ -26,7 +26,7 @@ class Connector:
         return Connector(identifier=data["id"], connector_type=data["type"])
 
     def to_dict(self) -> Dict[str, Any]:
-        return {"id": self._identifier, "type": self.connector_type}
+        return {"id": self._identifier, "type": self._connector_type}
 
 
 class Sensor:
@@ -70,7 +70,7 @@ class Info:
             firmware=data["firmware"],
             large_display=data["largedisplay"],
             connectors=[
-                Connector.from_dict(data=connector) for connector in data["connectors"]
+                Connector.from_dict(connector) for connector in data["connectors"]
             ],
             sensors=[Sensor.from_dict(sensor) for sensor in data["sensors"]],
         )
@@ -87,7 +87,7 @@ class Info:
         }
 
 
-class Topic(TopicInterface):
+class Topic:
     def __init__(self, broker_id: str, topic: str, payload: str, event_type: EventType):
         self.broker_id = broker_id
         self.topic = topic
@@ -111,7 +111,7 @@ class Topic(TopicInterface):
             "brokerid": self.broker_id,
             "topic": self.topic,
             "payload": self.payload,
-            "eventtype": self.event_type,
+            "eventtype": self.event_type.,
         }
 
 
@@ -299,7 +299,7 @@ class MqttBroker:
 
     def to_dict(self) -> Dict[str, Any]:
         return {
-            "brokerid": self.broker_id,
+            "brokerid": self.broker_id or "ha-button-plus",
             "url": self.url,
             "port": self.port,
             "wsport": self.ws_port,
@@ -411,21 +411,21 @@ class DeviceConfiguration:
         ]
 
     @staticmethod
-    def from_dict(json_data: any) -> "DeviceConfiguration":
+    def from_dict(data: Dict[str, Any]) -> "DeviceConfiguration":
         return DeviceConfiguration(
-            info=Info.from_dict(json_data["info"]),
-            core=Core.from_dict(json_data["core"]),
+            info=Info.from_dict(data["info"]),
+            core=Core.from_dict(data["core"]),
             mqtt_buttons=[
-                MqttButton.from_dict(button) for button in json_data["mqttbuttons"]
+                MqttButton.from_dict(button) for button in data["mqttbuttons"]
             ],
             mqtt_displays=[
-                MqttDisplay.from_dict(display) for display in json_data["mqttdisplays"]
+                MqttDisplay.from_dict(display) for display in data["mqttdisplays"]
             ],
             mqtt_brokers=[
-                MqttBroker.from_dict(broker) for broker in json_data["mqttbrokers"]
+                MqttBroker.from_dict(broker) for broker in data["mqttbrokers"]
             ],
             mqtt_sensors=[
-                MqttSensor.from_dict(sensor) for sensor in json_data["mqttsensors"]
+                MqttSensor.from_dict(sensor) for sensor in data["mqttsensors"]
             ],
         )
 
