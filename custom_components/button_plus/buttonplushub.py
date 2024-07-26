@@ -8,7 +8,7 @@ from typing import List
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import aiohttp_client
-from homeassistant.helpers import device_registry as dr
+from homeassistant.helpers import device_registry as DeviceRegistry
 
 from .button_plus_api.connector_type import ConnectorType
 from .button_plus_api.local_api_client import LocalApiClient
@@ -41,12 +41,14 @@ class ButtonPlusHub:
         self.manufacturer = MANUFACTURER
         self.model = "Base Module"
 
-        device_registry = dr.async_get(hass)
+        device_registry = DeviceRegistry.async_get(hass)
 
         self.device = device_registry.async_get_or_create(
             configuration_url=f"http://{self.config.ip_address()}/",
             config_entry_id=entry.entry_id,
-            connections={(dr.CONNECTION_NETWORK_MAC, self.config.mac_address())},
+            connections={
+                (DeviceRegistry.CONNECTION_NETWORK_MAC, self.config.mac_address())
+            },
             identifiers={(DOMAIN, self.config.identifier())},
             manufacturer=self.manufacturer,
             suggested_area=self.config.location(),
@@ -68,15 +70,15 @@ class ButtonPlusHub:
             for connector_id in self.connector_identifiers_for(ConnectorType.BAR)
         ]
 
-    @staticmethod
     def create_display_module(
-        hass: HomeAssistant, entry: ConfigEntry, hub: ButtonPlusHub
+        self, hass: HomeAssistant, entry: ConfigEntry, hub: ButtonPlusHub
     ) -> None:
         _LOGGER.debug(f"Add display module from '{hub.hub_id}'")
-        device_registry = dr.async_get(hass)
+        device_registry = DeviceRegistry.async_get(hass)
 
         device = device_registry.async_get_or_create(
             config_entry_id=entry.entry_id,
+            connections={(DOMAIN, hub.config.identifier())},
             name=f"{hub.name} Display Module",
             model="Display Module",
             manufacturer=MANUFACTURER,
@@ -87,8 +89,8 @@ class ButtonPlusHub:
 
         return device
 
-    @staticmethod
     def create_bar_module(
+        self,
         hass: HomeAssistant,
         entry: ConfigEntry,
         hub: ButtonPlusHub,
@@ -97,15 +99,16 @@ class ButtonPlusHub:
         _LOGGER.debug(
             f"Add bar module from '{hub.hub_id}' with connector '{connector_id}'"
         )
-        device_registry = dr.async_get(hass)
+        device_registry = DeviceRegistry.async_get(hass)
 
         device = device_registry.async_get_or_create(
             config_entry_id=entry.entry_id,
+            connections={(DOMAIN, hub.config.identifier())},
             name=f"{hub._name} BAR Module {connector_id}",
             model="Bar module",
             manufacturer=MANUFACTURER,
             suggested_area=hub.config.location(),
-            identifiers={(DOMAIN, f"{hub.hub} BAR Module {connector_id}")},
+            identifiers={(DOMAIN, f"{hub.hub_id} BAR Module {connector_id}")},
             via_device=(DOMAIN, hub.hub_id),
         )
 

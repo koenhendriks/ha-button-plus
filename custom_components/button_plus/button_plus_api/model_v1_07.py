@@ -1,8 +1,7 @@
 import json
 from typing import List, Dict, Any
 
-from packaging import version
-from packaging.version import Version
+from packaging.version import parse as parseVersion, Version
 
 from .JSONCustomEncoder import CustomEncoder
 from .connector_type import ConnectorType
@@ -11,7 +10,7 @@ from .model_interface import Button
 
 
 class Connector:
-    def __init__(self, identifier: int, connector_type: int):
+    def __init__(self, identifier: int, connector_type: ConnectorType):
         self._identifier = identifier
         self._connector_type = connector_type
 
@@ -23,7 +22,9 @@ class Connector:
 
     @staticmethod
     def from_dict(data: Dict[str, Any]) -> "Connector":
-        return Connector(identifier=data["id"], connector_type=data["type"])
+        return Connector(
+            identifier=data["id"], connector_type=ConnectorType(data["type"])
+        )
 
     def to_dict(self) -> Dict[str, Any]:
         return {"id": self._identifier, "type": self._connector_type}
@@ -103,7 +104,7 @@ class Topic:
             broker_id=data["brokerid"],
             topic=data["topic"],
             payload=data["payload"],
-            event_type=data["eventtype"],
+            event_type=EventType(data["eventtype"]),
         )
 
     def to_dict(self) -> Dict[str, Any]:
@@ -111,7 +112,7 @@ class Topic:
             "brokerid": self.broker_id,
             "topic": self.topic,
             "payload": self.payload,
-            "eventtype": self.event_type.,
+            "eventtype": self.event_type,
         }
 
 
@@ -191,6 +192,9 @@ class MqttButton(Button):
         self.long_delay = long_delay
         self.long_repeat = long_repeat
         self.topics = topics
+
+    def add_topic(self, topic: str, event_type: EventType, payload: str = "") -> None:
+        self.topics.append(Topic("ha-button-plus", topic, payload, event_type))
 
     @staticmethod
     def from_dict(data: Dict[str, Any]) -> "MqttButton":
@@ -289,7 +293,7 @@ class MqttBroker:
     @staticmethod
     def from_dict(data: Dict[str, Any]) -> "MqttBroker":
         return MqttBroker(
-            broker_id=data["brokerid"],
+            broker_id=data["brokerid"] or "ha-button-plus",
             url=data["url"],
             port=data["port"],
             ws_port=data["wsport"],
@@ -348,10 +352,10 @@ class DeviceConfiguration:
         self.mqtt_sensors = mqtt_sensors
 
     def firmware_version(self) -> Version:
-        return version.parse(self.info.firmware)
+        return parseVersion(self.info.firmware)
 
     def supports_brightness(self) -> bool:
-        return self.firmware_version() >= version.parse("1.11")
+        return self.firmware_version() >= parseVersion("1.11")
 
     def name(self) -> str:
         return self.core.name or self.info.device_id
@@ -368,7 +372,7 @@ class DeviceConfiguration:
     def location(self) -> str:
         return self.core.location
 
-    def connector_for(self, *identifier: int) -> Connector:
+    def connector_for(self, identifier: int) -> Connector:
         return next(
             (
                 connector
@@ -409,6 +413,9 @@ class DeviceConfiguration:
         self.core.topics = [
             topic for topic in self.core.topics if topic.event_type != event_type
         ]
+
+    def topics(self) -> List[Topic]:
+        return self.core.topics
 
     @staticmethod
     def from_dict(data: Dict[str, Any]) -> "DeviceConfiguration":

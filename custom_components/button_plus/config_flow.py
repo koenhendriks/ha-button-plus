@@ -275,7 +275,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         active_connectors = [
             connector.identifier()
             for connector in device_config.connectors_for(
-                ConnectorType.BAR, ConnectorType.DISPLAY
+                ConnectorType.DISPLAY, ConnectorType.BAR
             )
         ]
 
@@ -290,43 +290,29 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             device_config.buttons(),
         ):
             # Create topics for button main label
-            button.topics.append(
-                {
-                    "brokerid": "ha-button-plus",
-                    "topic": f"buttonplus/{device_id}/button/{button.button_id}/label",
-                    "payload": "",
-                    "eventtype": EventType.LABEL,
-                }
+            button.add_topic(
+                f"buttonplus/{device_id}/button/{button.button_id}/label",
+                EventType.LABEL,
             )
 
             # Create topics for button top label
-            button.topics.append(
-                {
-                    "brokerid": "ha-button-plus",
-                    "topic": f"buttonplus/{device_id}/button/{button.button_id}/top_label",
-                    "payload": "",
-                    "eventtype": EventType.TOPLABEL,
-                }
+            button.add_topic(
+                f"buttonplus/{device_id}/button/{button.button_id}/top_label",
+                EventType.TOPLABEL,
             )
 
             # Create topics for button click
-            button.topics.append(
-                {
-                    "brokerid": "ha-button-plus",
-                    "topic": f"buttonplus/{device_id}/button/{button.button_id}/click",
-                    "payload": "press",
-                    "eventtype": EventType.CLICK,
-                }
+            button.add_topic(
+                f"buttonplus/{device_id}/button/{button.button_id}/click",
+                EventType.CLICK,
+                "press",
             )
 
             # Create topics for button click
-            button.topics.append(
-                {
-                    "brokerid": "ha-button-plus",
-                    "topic": f"buttonplus/{device_id}/button/{button.button_id}/long_press",
-                    "payload": "press",
-                    "eventtype": EventType.LONG_PRESS,
-                }
+            button.add_topic(
+                f"buttonplus/{device_id}/button/{button.button_id}/long_press",
+                EventType.LONG_PRESS,
+                "press",
             )
 
     def get_mqtt_endpoint(self, endpoint: str) -> str:

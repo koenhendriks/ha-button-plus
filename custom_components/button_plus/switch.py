@@ -29,7 +29,9 @@ async def async_setup_entry(
 
     active_connectors = [
         connector.identifier()
-        for connector in hub.config.connectors_for(ConnectorType.DISPLAY, ConnectorType.BAR)
+        for connector in hub.config.connectors_for(
+            ConnectorType.DISPLAY, ConnectorType.BAR
+        )
     ]
 
     buttons = filter(
@@ -81,7 +83,7 @@ class ButtonPlusSwitch(SwitchEntity):
                 device_info["identifiers"] = {
                     (
                         DOMAIN,
-                        f"{self._hub.identifier}_{self._btn_id}_bar_module_{self._connector.identifier()}",
+                        f"{self._hub.hub_id}_{self._btn_id}_bar_module_{self._connector.identifier()}",
                     )
                 }
             case ConnectorType.DISPLAY:
@@ -89,7 +91,7 @@ class ButtonPlusSwitch(SwitchEntity):
                 device_info["connections"] = {("display_module", 1)}
                 device_info["model"] = "Display Module"
                 device_info["identifiers"] = {
-                    (DOMAIN, f"{self._hub.identifier}_{self._btn_id}_display_module")
+                    (DOMAIN, f"{self._hub.hub_id}_{self._btn_id}_display_module")
                 }
 
         return device_info

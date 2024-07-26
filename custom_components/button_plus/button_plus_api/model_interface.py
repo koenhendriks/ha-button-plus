@@ -17,8 +17,11 @@ class Connector:
 
 
 class Button:
-    def button_id(self) -> int:
-        """Return the identifier of the connector."""
+    button_id: int
+    label: str
+
+    def add_topic(self, topic: str, event_type: EventType, payload: str = "") -> None:
+        """Set the MQTT topic."""
         pass
 
 
@@ -60,7 +63,7 @@ class DeviceConfiguration:
         """Return the connectors of the given type."""
         pass
 
-    def connector_for(self, *identifier: int) -> Connector:
+    def connector_for(self, identifier: int) -> Connector:
         """Return the connectors of the given type."""
         pass
 
@@ -82,6 +85,12 @@ class DeviceConfiguration:
 
     def remove_topic_for(self, event_type: EventType) -> None:
         """Remove the MQTT topic."""
+        pass
+
+    def topics(self) -> List[Topic]:
+        """
+        :return: List of topics for the device
+        """
         pass
 
     @staticmethod

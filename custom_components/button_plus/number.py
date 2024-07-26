@@ -55,6 +55,7 @@ class ButtonPlusBrightness(NumberEntity):
         self.entity_id = f"brightness.{brightness_type}_{self._hub_id}"
         self._attr_name = f"brightness-{brightness_type}"
         self.event_type = event_type
+        self._topics = hub.config.topics()
         self._attr_icon = "mdi:television-ambient-light"
         self._attr_unique_id = f"brightness_{brightness_type}-{self._hub_id}"
 

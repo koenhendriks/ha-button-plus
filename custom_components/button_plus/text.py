@@ -30,9 +30,10 @@ async def async_setup_entry(
     text_entities = []
     hub: ButtonPlusHub = hass.data[DOMAIN][config_entry.entry_id]
 
-    active_connectors = hub.config.connectors_for(
-        ConnectorType.BAR, ConnectorType.DISPLAY
-    )
+    active_connectors = [
+        connector.identifier()
+        for connector in hub.config.connectors_for(ConnectorType.DISPLAY, ConnectorType.BAR)
+    ]
 
     buttons = filter(
         lambda b: b.button_id // 2 in active_connectors, hub.config.buttons()
@@ -64,9 +65,7 @@ class ButtonPlusText(TextEntity):
         self.entity_id = f"text.{text_type}_{self._hub_id}_{btn_id}"
         self._attr_name = f"text-{text_type}-{btn_id}"
         self._attr_native_value = btn_label
-        self._connector = hub.config.connectors_for(
-            ConnectorType.DISPLAY, ConnectorType.BAR
-        )[btn_id // 2]
+        self._connector = hub.config.connectors()[btn_id // 2]
         self._unique_id = self.unique_id_gen()
 
     def unique_id_gen(self):
