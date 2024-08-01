@@ -1,6 +1,7 @@
 [project]
 name = "ha-button-plus"
 dynamic = ["version"]
+requires-python = ">= 3.12"
 
 dependencies = [
   "homeassistant",
