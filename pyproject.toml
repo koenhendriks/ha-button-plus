@@ -8,6 +8,9 @@ dependencies = [
   "packaging"
 ]
 
+[tool.setuptools]
+py-modules = ["custom_components"]
+
 [tool.pytest.ini_options]
 pythonpath = [
   "."
