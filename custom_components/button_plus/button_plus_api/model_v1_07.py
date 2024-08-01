@@ -1,4 +1,5 @@
 import json
+import logging
 from typing import List, Dict, Any
 
 from packaging.version import parse as parseVersion, Version
@@ -8,6 +9,7 @@ from .connector_type import ConnectorType
 from .event_type import EventType
 from .model_interface import Button
 
+_LOGGER: logging.Logger = logging.getLogger(__package__)
 
 class Connector:
     def __init__(self, identifier: int, connector_type: ConnectorType):
@@ -18,7 +20,7 @@ class Connector:
         return self._identifier
 
     def connector_type(self) -> ConnectorType:
-        return ConnectorType(self.connector_type)
+        return ConnectorType(self._connector_type)
 
     @staticmethod
     def from_dict(data: Dict[str, Any]) -> "Connector":
@@ -383,10 +385,11 @@ class DeviceConfiguration:
         )
 
     def connectors_for(self, *connector_type: ConnectorType) -> List[Connector]:
+        _LOGGER.debug(f"Filter all {len(self.info.connectors)} connectors by type {connector_type}")
         return [
             connector
             for connector in self.info.connectors
-            if connector.connector_type in [connector_type]
+            if connector.connector_type() in connector_type
         ]
 
     def connectors(self) -> List[Connector]:

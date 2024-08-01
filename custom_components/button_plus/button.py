@@ -39,9 +39,7 @@ async def async_setup_entry(
 
     active_connectors = [
         connector.identifier()
-        for connector in hub.config.connectors_for(
-            ConnectorType.DISPLAY, ConnectorType.BAR
-        )
+        for connector in hub.config.connectors_for(ConnectorType.DISPLAY, ConnectorType.BAR)
     ]
 
     buttons = filter(
@@ -50,7 +48,7 @@ async def async_setup_entry(
 
     for button in buttons:
         _LOGGER.info(
-            f"Creating button with parameters: {button.button_id} {button.label} {hub.hub_id}"
+            f"Creating button with parameters: {button.button_id} {button.top_label} {button.label} {hub.hub_id}"
         )
         entity = ButtonPlusButton(button.button_id, hub)
         button_entities.append(entity)
@@ -84,7 +82,7 @@ class ButtonPlusButton(ButtonEntity):
         self._attr_name = f"button-{btn_id}"
         self._name = f"Button {btn_id}"
         self._device_class = ButtonDeviceClass.IDENTIFY
-        self._connector: Connector = hub.config.connector_for(identifier=btn_id // 2)
+        self._connector: Connector = hub.config.connector_for(btn_id // 2)
         self.unique_id = self.unique_id_gen()
 
     def unique_id_gen(self):

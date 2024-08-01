@@ -31,8 +31,8 @@ async def async_setup_entry(
 
     for button in buttons:
         # _LOGGER.debug(f"Creating Lights with parameters: {button.button_id} {button.label} {hub.hub_id}")
-        lights.append(ButtonPlusWallLight(button.button_id(), hub))
-        lights.append(ButtonPlusFrontLight(button.button_id(), hub))
+        lights.append(ButtonPlusWallLight(button.button_id, hub))
+        lights.append(ButtonPlusFrontLight(button.button_id, hub))
 
     async_add_entities(lights)
 
@@ -86,7 +86,7 @@ class ButtonPlusLight(LightEntity):
             "manufacturer": MANUFACTURER,
         }
 
-        match self._connector.connector_type:
+        match self._connector.connector_type():
             case 1:
                 device_info["name"] = f"BAR Module {self._connector.identifier()}"
                 device_info["connections"] = {

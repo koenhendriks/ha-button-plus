@@ -18,6 +18,7 @@ class Connector:
 
 class Button:
     button_id: int
+    top_label: str
     label: str
 
     def add_topic(self, topic: str, event_type: EventType, payload: str = "") -> None:

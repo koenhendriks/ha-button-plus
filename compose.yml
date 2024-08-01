@@ -1,4 +1,14 @@
 services:
+  mosquitto:
+    image: eclipse-mosquitto
+    container_name: mosquitto
+    volumes:
+      - ./mosquitto_config:/mosquitto/config
+    ports:
+      - 1883:1883
+      - 9001:9001
+    stdin_open: true 
+    tty: true
   homeassistant:
     container_name: homeassistant
     image: "ghcr.io/home-assistant/home-assistant:stable"

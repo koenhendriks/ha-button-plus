@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import Any, List
 
 from homeassistant.components.text import TextEntity
 from homeassistant.config_entries import ConfigEntry
@@ -27,7 +27,7 @@ async def async_setup_entry(
 ) -> None:
     """Add text entity for each top and main label from config_entry in HA."""
 
-    text_entities = []
+    text_entities: List[ButtonPlusText] = []
     hub: ButtonPlusHub = hass.data[DOMAIN][config_entry.entry_id]
 
     active_connectors = [
@@ -40,17 +40,16 @@ async def async_setup_entry(
     )
 
     for button in buttons:
-        _LOGGER.debug(
-            f"Creating Texts with parameters: {button.button_id()} {button.top_label} {button.label} {hub.hub_id}"
+        _LOGGER.info(
+            f"Creating texts with parameters: {button.button_id} {button.top_label} {button.label} {hub.hub_id}"
         )
 
         label_entity = ButtonPlusLabel(button.button_id, hub, button.label)
-        top_label_entity = ButtonPlusTopLabel(button.button_id, hub, button.top_label)
-
         text_entities.append(label_entity)
-        text_entities.append(top_label_entity)
-
         hub.add_label(button.button_id, label_entity)
+
+        top_label_entity = ButtonPlusTopLabel(button.button_id, hub, button.top_label)
+        text_entities.append(top_label_entity)
         hub.add_top_label(button.button_id, top_label_entity)
 
     async_add_entities(text_entities)
@@ -58,15 +57,15 @@ async def async_setup_entry(
 
 class ButtonPlusText(TextEntity):
     def __init__(self, btn_id: int, hub: ButtonPlusHub, btn_label: str, text_type: str):
-        self._btn_id = btn_id
-        self._hub = hub
         self._hub_id = hub.hub_id
+        self._hub = hub
+        self._btn_id = btn_id
         self._text_type = text_type
         self.entity_id = f"text.{text_type}_{self._hub_id}_{btn_id}"
         self._attr_name = f"text-{text_type}-{btn_id}"
         self._attr_native_value = btn_label
-        self._connector = hub.config.connectors()[btn_id // 2]
-        self._unique_id = self.unique_id_gen()
+        self._connector = hub.config.connector_for(btn_id // 2)
+        self.unique_id = self.unique_id_gen()
 
     def unique_id_gen(self):
         match self._connector.connector_type():
