@@ -4,6 +4,7 @@ dynamic = ["version"]
 
 dependencies = [
   "homeassistant",
+  "setuptools",
   "pre-commit",
   "packaging"
 ]
