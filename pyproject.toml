@@ -1,8 +1,19 @@
 [project]
 name = "ha-button-plus"
 dynamic = ["version"]
+requires-python = ">= 3.12"
 
 dependencies = [
   "homeassistant",
+  "setuptools",
   "pre-commit",
+  "packaging"
+]
+
+[tool.setuptools]
+py-modules = ["custom_components"]
+
+[tool.pytest.ini_options]
+pythonpath = [
+  "."
 ]

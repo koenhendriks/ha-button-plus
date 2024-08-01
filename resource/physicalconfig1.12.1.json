@@ -1,0 +1,421 @@
+{
+  "info": {
+    "id": "btn_4584b8",
+    "mac": "F4:12:FA:45:84:B8",
+    "ipaddress": "192.168.102.10",
+    "firmware": "1.12.2",
+    "largedisplay": 0,
+    "connectors": [
+      {
+        "id": 0,
+        "type": 2
+      },
+      {
+        "id": 1,
+        "type": 1
+      },
+      {
+        "id": 2,
+        "type": 1
+      },
+      {
+        "id": 3,
+        "type": 1
+      }
+    ],
+    "sensors": [
+      {
+        "sensorid": 1,
+        "description": "Sensirion STS35 Temperature Sensor"
+      }
+    ]
+  },
+  "core": {
+    "name": "btn_4584b8",
+    "location": "Room 1",
+    "autobackup": true,
+    "brightness": 80,
+    "color": 16765791,
+    "statusbar": 2,
+    "topics": [
+      {
+        "brokerid": "ha-button-plus",
+        "topic": "buttonplus/btn_4584b8/page/status",
+        "payload": "",
+        "eventtype": 6
+      },
+      {
+        "brokerid": "ha-button-plus",
+        "topic": "buttonplus/btn_4584b8/page/set",
+        "payload": "",
+        "eventtype": 20
+      },
+      {
+        "brokerid": "ha-button-plus",
+        "topic": "buttonplus/btn_4584b8/brightness/large",
+        "payload": "",
+        "eventtype": 24
+      },
+      {
+        "brokerid": "ha-button-plus",
+        "topic": "buttonplus/btn_4584b8/brightness/mini",
+        "payload": "",
+        "eventtype": 25
+      }
+    ]
+  },
+  "mqttbuttons": [
+    {
+      "id": 0,
+      "label": "Btn 0",
+      "toplabel": "Label",
+      "ledcolorfront": 0,
+      "ledcolorwall": 0,
+      "longdelay": 40,
+      "longrepeat": 15,
+      "topics": [
+        {
+          "brokerid": "ha-button-plus",
+          "topic": "buttonplus/btn_4584b8/button/0/click",
+          "payload": "press",
+          "eventtype": 0
+        },
+        {
+          "brokerid": "ha-button-plus",
+          "topic": "buttonplus/btn_4584b8/button/0/long_press",
+          "payload": "press",
+          "eventtype": 1
+        },
+        {
+          "brokerid": "ha-button-plus",
+          "topic": "buttonplus/btn_4584b8/button/0/label",
+          "payload": "",
+          "eventtype": 11
+        },
+        {
+          "brokerid": "ha-button-plus",
+          "topic": "buttonplus/btn_4584b8/button/0/top_label",
+          "payload": "",
+          "eventtype": 12
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "label": "Btn 1",
+      "toplabel": "Label",
+      "ledcolorfront": 0,
+      "ledcolorwall": 0,
+      "longdelay": 40,
+      "longrepeat": 15,
+      "topics": [
+        {
+          "brokerid": "ha-button-plus",
+          "topic": "buttonplus/btn_4584b8/button/1/click",
+          "payload": "press",
+          "eventtype": 0
+        },
+        {
+          "brokerid": "ha-button-plus",
+          "topic": "buttonplus/btn_4584b8/button/1/long_press",
+          "payload": "press",
+          "eventtype": 1
+        },
+        {
+          "brokerid": "ha-button-plus",
+          "topic": "buttonplus/btn_4584b8/button/1/label",
+          "payload": "",
+          "eventtype": 11
+        },
+        {
+          "brokerid": "ha-button-plus",
+          "topic": "buttonplus/btn_4584b8/button/1/top_label",
+          "payload": "",
+          "eventtype": 12
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "label": "SNEL",
+      "toplabel": "Autoladen",
+      "ledcolorfront": 0,
+      "ledcolorwall": 0,
+      "longdelay": 40,
+      "longrepeat": 15,
+      "topics": [
+        {
+          "brokerid": "ha-button-plus",
+          "topic": "buttonplus/btn_4584b8/button/2/click",
+          "payload": "press",
+          "eventtype": 0
+        },
+        {
+          "brokerid": "ha-button-plus",
+          "topic": "buttonplus/btn_4584b8/button/2/long_press",
+          "payload": "press",
+          "eventtype": 1
+        },
+        {
+          "brokerid": "ha-button-plus",
+          "topic": "buttonplus/btn_4584b8/button/2/label",
+          "payload": "",
+          "eventtype": 11
+        },
+        {
+          "brokerid": "ha-button-plus",
+          "topic": "buttonplus/btn_4584b8/button/2/top_label",
+          "payload": "",
+          "eventtype": 12
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "label": "Thuis",
+      "toplabel": "Aanwezigheid",
+      "ledcolorfront": 0,
+      "ledcolorwall": 0,
+      "longdelay": 40,
+      "longrepeat": 15,
+      "topics": [
+        {
+          "brokerid": "ha-button-plus",
+          "topic": "buttonplus/btn_4584b8/button/3/click",
+          "payload": "press",
+          "eventtype": 0
+        },
+        {
+          "brokerid": "ha-button-plus",
+          "topic": "buttonplus/btn_4584b8/button/3/long_press",
+          "payload": "press",
+          "eventtype": 1
+        },
+        {
+          "brokerid": "ha-button-plus",
+          "topic": "buttonplus/btn_4584b8/button/3/label",
+          "payload": "",
+          "eventtype": 11
+        },
+        {
+          "brokerid": "ha-button-plus",
+          "topic": "buttonplus/btn_4584b8/button/3/top_label",
+          "payload": "",
+          "eventtype": 12
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "label": "Uit tot 22:25",
+      "toplabel": "Airco",
+      "ledcolorfront": 0,
+      "ledcolorwall": 0,
+      "longdelay": 40,
+      "longrepeat": 15,
+      "topics": [
+        {
+          "brokerid": "ha-button-plus",
+          "topic": "buttonplus/btn_4584b8/button/4/click",
+          "payload": "press",
+          "eventtype": 0
+        },
+        {
+          "brokerid": "ha-button-plus",
+          "topic": "buttonplus/btn_4584b8/button/4/long_press",
+          "payload": "press",
+          "eventtype": 1
+        },
+        {
+          "brokerid": "ha-button-plus",
+          "topic": "buttonplus/btn_4584b8/button/4/label",
+          "payload": "",
+          "eventtype": 11
+        },
+        {
+          "brokerid": "ha-button-plus",
+          "topic": "buttonplus/btn_4584b8/button/4/top_label",
+          "payload": "",
+          "eventtype": 12
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "label": "Btn",
+      "toplabel": "Label",
+      "ledcolorfront": 0,
+      "ledcolorwall": 0,
+      "longdelay": 40,
+      "longrepeat": 15,
+      "topics": [
+        {
+          "brokerid": "ha-button-plus",
+          "topic": "buttonplus/btn_4584b8/button/5/click",
+          "payload": "press",
+          "eventtype": 0
+        },
+        {
+          "brokerid": "ha-button-plus",
+          "topic": "buttonplus/btn_4584b8/button/5/long_press",
+          "payload": "press",
+          "eventtype": 1
+        },
+        {
+          "brokerid": "ha-button-plus",
+          "topic": "buttonplus/btn_4584b8/button/5/label",
+          "payload": "",
+          "eventtype": 11
+        },
+        {
+          "brokerid": "ha-button-plus",
+          "topic": "buttonplus/btn_4584b8/button/5/top_label",
+          "payload": "",
+          "eventtype": 12
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "label": "Btn 6",
+      "toplabel": "Label",
+      "ledcolorfront": 0,
+      "ledcolorwall": 0,
+      "longdelay": 40,
+      "longrepeat": 15,
+      "topics": [
+        {
+          "brokerid": "ha-button-plus",
+          "topic": "buttonplus/btn_4584b8/button/6/click",
+          "payload": "press",
+          "eventtype": 0
+        },
+        {
+          "brokerid": "ha-button-plus",
+          "topic": "buttonplus/btn_4584b8/button/6/long_press",
+          "payload": "press",
+          "eventtype": 1
+        },
+        {
+          "brokerid": "ha-button-plus",
+          "topic": "buttonplus/btn_4584b8/button/6/label",
+          "payload": "",
+          "eventtype": 11
+        },
+        {
+          "brokerid": "ha-button-plus",
+          "topic": "buttonplus/btn_4584b8/button/6/top_label",
+          "payload": "",
+          "eventtype": 12
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "label": "Btn 7",
+      "toplabel": "Label",
+      "ledcolorfront": 0,
+      "ledcolorwall": 0,
+      "longdelay": 40,
+      "longrepeat": 15,
+      "topics": [
+        {
+          "brokerid": "ha-button-plus",
+          "topic": "buttonplus/btn_4584b8/button/7/click",
+          "payload": "press",
+          "eventtype": 0
+        },
+        {
+          "brokerid": "ha-button-plus",
+          "topic": "buttonplus/btn_4584b8/button/7/long_press",
+          "payload": "press",
+          "eventtype": 1
+        },
+        {
+          "brokerid": "ha-button-plus",
+          "topic": "buttonplus/btn_4584b8/button/7/label",
+          "payload": "",
+          "eventtype": 11
+        },
+        {
+          "brokerid": "ha-button-plus",
+          "topic": "buttonplus/btn_4584b8/button/7/top_label",
+          "payload": "",
+          "eventtype": 12
+        }
+      ]
+    }
+  ],
+  "mqttdisplays": [
+    {
+      "x": 0,
+      "y": 0,
+      "boxtype": 0,
+      "fontsize": 4,
+      "align": 1,
+      "width": 50,
+      "round": 0,
+      "label": "Amsterdam",
+      "unit": "",
+      "page": 0,
+      "topics": [
+        {
+          "brokerid": "buttonplus",
+          "topic": "system/datetime/amsterdam",
+          "payload": "",
+          "eventtype": 15
+        }
+      ]
+    },
+    {
+      "x": 0,
+      "y": 40,
+      "boxtype": 0,
+      "fontsize": 2,
+      "align": 1,
+      "width": 30,
+      "round": 1,
+      "label": "",
+      "unit": "°C",
+      "page": 0,
+      "topics": [
+        {
+          "brokerid": "buttonplus",
+          "topic": "button/btn_4584b8/temperature",
+          "payload": "",
+          "eventtype": 15
+        }
+      ]
+    }
+  ],
+  "mqttbrokers": [
+    {
+      "brokerid": "ha",
+      "url": "ha.localdomain",
+      "port": 0,
+      "wsport": 0,
+      "username": "mqtt_user",
+      "password": "mqtt_password"
+    },
+    {
+      "brokerid": "ha-button-plus",
+      "url": "mqtt://ha.localdomain/",
+      "port": 1883,
+      "wsport": 9001,
+      "username": "mqtt_user",
+      "password": "mqtt_password"
+    }
+  ],
+  "mqttsensors": [
+    {
+      "sensorid": 1,
+      "interval": 10,
+      "topic": {
+        "brokerid": "buttonplus",
+        "topic": "button/btn_4584b8/temperature",
+        "payload": "",
+        "eventtype": 18
+      }
+    }
+  ]
+}

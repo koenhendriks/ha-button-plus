@@ -1,21 +1,36 @@
 import json
+import logging
 from typing import List, Dict, Any
 
-from .connector_type import ConnectorEnum
+from packaging.version import parse as parseVersion, Version
+
+from .JSONCustomEncoder import CustomEncoder
+from .connector_type import ConnectorType
 from .event_type import EventType
+from .model_interface import Button
+
+_LOGGER: logging.Logger = logging.getLogger(__package__)
 
 
 class Connector:
-    def __init__(self, connector_id: int, connector_type: int):
-        self.connector_id = connector_id
-        self.connector_type = connector_type
+    def __init__(self, identifier: int, connector_type: ConnectorType):
+        self._identifier = identifier
+        self._connector_type = connector_type
 
-    def connector_type_enum(self) -> ConnectorEnum:
-        return ConnectorEnum(self.connector_type)
+    def identifier(self) -> int:
+        return self._identifier
+
+    def connector_type(self) -> ConnectorType:
+        return ConnectorType(self._connector_type)
 
     @staticmethod
     def from_dict(data: Dict[str, Any]) -> "Connector":
-        return Connector(connector_id=data["id"], connector_type=data["type"])
+        return Connector(
+            identifier=data["id"], connector_type=ConnectorType(data["type"])
+        )
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {"id": self._identifier, "type": self._connector_type}
 
 
 class Sensor:
@@ -26,6 +41,9 @@ class Sensor:
     @staticmethod
     def from_dict(data: Dict[str, Any]) -> "Sensor":
         return Sensor(sensor_id=data["sensorid"], description=data["description"])
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {"sensorid": self.sensor_id, "description": self.description}
 
 
 class Info:
@@ -61,9 +79,20 @@ class Info:
             sensors=[Sensor.from_dict(sensor) for sensor in data["sensors"]],
         )
 
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "id": self.device_id,
+            "mac": self.mac,
+            "ipaddress": self.ip_address,
+            "firmware": self.firmware,
+            "largedisplay": self.large_display,
+            "connectors": [connector.to_dict() for connector in self.connectors],
+            "sensors": [sensor.to_dict() for sensor in self.sensors],
+        }
+
 
 class Topic:
-    def __init__(self, broker_id: str, topic: str, payload: str, event_type: int):
+    def __init__(self, broker_id: str, topic: str, payload: str, event_type: EventType):
         self.broker_id = broker_id
         self.topic = topic
         self.payload = payload
@@ -78,8 +107,16 @@ class Topic:
             broker_id=data["brokerid"],
             topic=data["topic"],
             payload=data["payload"],
-            event_type=data["eventtype"],
+            event_type=EventType(data["eventtype"]),
         )
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "brokerid": self.broker_id,
+            "topic": self.topic,
+            "payload": self.payload,
+            "eventtype": self.event_type,
+        }
 
 
 class Core:
@@ -119,8 +156,26 @@ class Core:
             topics=[Topic.from_dict(topic) for topic in data.get("topics", [])],
         )
 
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "name": self.name,
+            "location": self.location,
+            "autobackup": self.auto_backup,
+            "brightnesslargedisplay": self.brightness_large_display,
+            "brightnessminidisplay": self.brightness_mini_display,
+            "ledcolorfront": self.led_color_front,
+            "ledcolorwall": self.led_color_wall,
+            "color": self.color,
+            # Only the Core object does not include the key when this list is empty (-:
+            **(
+                {"topics": [topic.to_dict() for topic in self.topics]}
+                if len(self.topics) > 0
+                else {}
+            ),
+        }
 
-class MqttButton:
+
+class MqttButton(Button):
     def __init__(
         self,
         button_id: int,
@@ -141,6 +196,9 @@ class MqttButton:
         self.long_repeat = long_repeat
         self.topics = topics
 
+    def add_topic(self, topic: str, event_type: EventType, payload: str = "") -> None:
+        self.topics.append(Topic("ha-button-plus", topic, payload, event_type))
+
     @staticmethod
     def from_dict(data: Dict[str, Any]) -> "MqttButton":
         return MqttButton(
@@ -153,6 +211,18 @@ class MqttButton:
             long_repeat=data["longrepeat"],
             topics=[Topic.from_dict(topic) for topic in data.get("topics", [])],
         )
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "id": self.button_id,
+            "label": self.label,
+            "toplabel": self.top_label,
+            "ledcolorfront": self.led_color_front,
+            "ledcolorwall": self.led_color_wall,
+            "longdelay": self.long_delay,
+            "longrepeat": self.long_repeat,
+            "topics": [topic.to_dict() for topic in self.topics],
+        }
 
 
 class MqttDisplay:
@@ -192,34 +262,57 @@ class MqttDisplay:
             topics=[Topic.from_dict(topic) for topic in data.get("topics", [])],
         )
 
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "x": self.x,
+            "y": self.y,
+            "fontsize": self.font_size,
+            "align": self.align,
+            "width": self.width,
+            "label": self.label,
+            "unit": self.unit,
+            "round": self.round,
+            "topics": [topic.to_dict() for topic in self.topics],
+        }
+
 
 class MqttBroker:
     def __init__(
         self,
-        broker_id: str,
         url: str,
         port: int,
-        ws_port: int,
         username: str,
         password: str,
+        broker_id="ha-button-plus",
+        ws_port=9001,
     ):
-        self.broker_id = broker_id
         self.url = url
         self.port = port
-        self.ws_port = ws_port
         self.username = username
         self.password = password
+        self.broker_id = broker_id
+        self.ws_port = ws_port
 
     @staticmethod
     def from_dict(data: Dict[str, Any]) -> "MqttBroker":
         return MqttBroker(
-            broker_id=data["brokerid"],
+            broker_id=data["brokerid"] or "ha-button-plus",
             url=data["url"],
             port=data["port"],
             ws_port=data["wsport"],
             username=data["username"],
             password=data["password"],
         )
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "brokerid": self.broker_id or "ha-button-plus",
+            "url": self.url,
+            "port": self.port,
+            "wsport": self.ws_port,
+            "username": self.username,
+            "password": self.password,
+        }
 
 
 class MqttSensor:
@@ -235,6 +328,13 @@ class MqttSensor:
             topic=Topic.from_dict(data["topic"]),
             interval=data["interval"],
         )
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "sensorid": self.sensor_id,
+            "topic": self.topic.to_dict(),
+            "interval": self.interval,
+        }
 
 
 class DeviceConfiguration:
@@ -254,9 +354,77 @@ class DeviceConfiguration:
         self.mqtt_brokers = mqtt_brokers
         self.mqtt_sensors = mqtt_sensors
 
+    def firmware_version(self) -> Version:
+        return parseVersion(self.info.firmware)
+
+    def supports_brightness(self) -> bool:
+        return self.firmware_version() >= parseVersion("1.11")
+
+    def name(self) -> str:
+        return self.core.name or self.info.device_id
+
+    def identifier(self) -> str:
+        return self.info.device_id
+
+    def ip_address(self) -> str:
+        return self.info.ip_address
+
+    def mac_address(self) -> str:
+        return self.info.mac
+
+    def location(self) -> str:
+        return self.core.location
+
+    def connector_for(self, identifier: int) -> Connector:
+        return next(
+            (
+                connector
+                for connector in self.info.connectors
+                if connector.identifier() == identifier
+            ),
+            None,
+        )
+
+    def connectors_for(self, *connector_type: ConnectorType) -> List[Connector]:
+        _LOGGER.debug(
+            f"Filter all {len(self.info.connectors)} connectors by type {connector_type}"
+        )
+        return [
+            connector
+            for connector in self.info.connectors
+            if connector.connector_type() in connector_type
+        ]
+
+    def connectors(self) -> List[Connector]:
+        return self.info.connectors
+
+    def buttons(self) -> List[Button]:
+        return [button for button in self.mqtt_buttons]
+
+    def set_broker(self, url: str, port: int, username: str, password: str) -> None:
+        self.mqtt_brokers.append(MqttBroker(url, port, username, password))
+
+    def add_topic(self, topic: str, event_type: EventType) -> None:
+        self.core.topics.append(
+            Topic(
+                broker_id="ha-button-plus",
+                topic=topic,
+                payload="",
+                event_type=event_type,
+            )
+        )
+
+    def remove_topic_for(self, event_type: EventType) -> None:
+        # Remove the topic with EventType event_type
+        self.core.topics = [
+            topic for topic in self.core.topics if topic.event_type != event_type
+        ]
+
+    def topics(self) -> List[Topic]:
+        return self.core.topics
+
     @staticmethod
-    def from_json(json_data: str) -> "DeviceConfiguration":
-        data = json.loads(json_data)
+    def from_dict(data: Dict[str, Any]) -> "DeviceConfiguration":
         return DeviceConfiguration(
             info=Info.from_dict(data["info"]),
             core=Core.from_dict(data["core"]),
@@ -274,73 +442,20 @@ class DeviceConfiguration:
             ],
         )
 
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "info": self.info.to_dict(),
+            "core": self.core.to_dict(),
+            "mqttbuttons": [button.to_dict() for button in self.mqtt_buttons],
+            "mqttdisplays": [display.to_dict() for display in self.mqtt_displays],
+            "mqttbrokers": [broker.to_dict() for broker in self.mqtt_brokers],
+            "mqttsensors": [sensor.to_dict() for sensor in self.mqtt_sensors],
+        }
+
     def to_json(self) -> str:
-        def serialize(obj):
-            if hasattr(obj, "__dict__"):
-                d = obj.__dict__.copy()
-
-                # Convert the root keys
-                if isinstance(obj, DeviceConfiguration):
-                    d["mqttbuttons"] = [
-                        serialize(button) for button in d.pop("mqtt_buttons")
-                    ]
-                    d["mqttdisplays"] = [
-                        serialize(display) for display in d.pop("mqtt_displays")
-                    ]
-                    d["mqttbrokers"] = [
-                        serialize(broker) for broker in d.pop("mqtt_brokers")
-                    ]
-                    d["mqttsensors"] = [
-                        serialize(sensor) for sensor in d.pop("mqtt_sensors")
-                    ]
-
-                if isinstance(obj, Info):
-                    d["id"] = d.pop("device_id")
-                    d["ipaddress"] = d.pop("ip_address")
-                    d["largedisplay"] = d.pop("large_display")
-
-                elif isinstance(obj, Connector):
-                    d["id"] = d.pop("connector_id")
-                    d["type"] = d.pop("connector_type")
-
-                elif isinstance(obj, Sensor):
-                    d["sensorid"] = d.pop("sensor_id")
-
-                elif isinstance(obj, Core):
-                    d["autobackup"] = d.pop("auto_backup")
-                    d["brightnesslargedisplay"] = d.pop("brightness_large_display")
-                    d["brightnessminidisplay"] = d.pop("brightness_mini_display")
-                    d["ledcolorfront"] = d.pop("led_color_front")
-                    d["ledcolorwall"] = d.pop("led_color_wall")
-
-                # Custom mappings for MqttButton class
-                elif isinstance(obj, MqttButton):
-                    d["id"] = d.pop("button_id")
-                    d["toplabel"] = d.pop("top_label")
-                    d["ledcolorfront"] = d.pop("led_color_front")
-                    d["ledcolorwall"] = d.pop("led_color_wall")
-                    d["longdelay"] = d.pop("long_delay")
-                    d["longrepeat"] = d.pop("long_repeat")
-
-                elif isinstance(obj, Topic):
-                    d["brokerid"] = d.pop("broker_id")
-                    d["eventtype"] = d.pop("event_type")
-
-                elif isinstance(obj, MqttDisplay):
-                    d["fontsize"] = d.pop("font_size")
-                    d["topics"] = [serialize(topic) for topic in d["topics"]]
-
-                elif isinstance(obj, MqttBroker):
-                    d["brokerid"] = d.pop("broker_id")
-                    d["wsport"] = d.pop("ws_port")
-
-                elif isinstance(obj, MqttSensor):
-                    d["sensorid"] = d.pop("sensor_id")
-                    d["topic"] = serialize(d["topic"])
-
-                # Filter out None values
-                return {k: v for k, v in d.items() if v is not None}
-            else:
-                return str(obj)
-
-        return json.dumps(self, default=serialize, indent=4)
+        return json.dumps(
+            self,
+            sort_keys=True,
+            cls=CustomEncoder,
+            indent=4,
+        )

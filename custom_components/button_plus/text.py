@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import Any, List
 
 from homeassistant.components.text import TextEntity
 from homeassistant.config_entries import ConfigEntry
@@ -14,7 +14,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.device_registry import DeviceInfo
 
 from . import ButtonPlusHub
-from .button_plus_api.model import ConnectorEnum
+from .button_plus_api.model_interface import ConnectorType
 from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
@@ -27,31 +27,31 @@ async def async_setup_entry(
 ) -> None:
     """Add text entity for each top and main label from config_entry in HA."""
 
-    text_entities = []
+    text_entities: List[ButtonPlusText] = []
     hub: ButtonPlusHub = hass.data[DOMAIN][config_entry.entry_id]
 
     active_connectors = [
-        connector.connector_id
-        for connector in hub.config.info.connectors
-        if connector.connector_type_enum() in [ConnectorEnum.DISPLAY, ConnectorEnum.BAR]
+        connector.identifier()
+        for connector in hub.config.connectors_for(
+            ConnectorType.DISPLAY, ConnectorType.BAR
+        )
     ]
 
     buttons = filter(
-        lambda b: b.button_id // 2 in active_connectors, hub.config.mqtt_buttons
+        lambda b: b.button_id // 2 in active_connectors, hub.config.buttons()
     )
 
     for button in buttons:
-        _LOGGER.debug(
-            f"Creating Texts with parameters: {button.button_id} {button.top_label} {button.label} {hub.hub_id}"
+        _LOGGER.info(
+            f"Creating texts with parameters: {button.button_id} {button.top_label} {button.label} {hub.hub_id}"
         )
 
         label_entity = ButtonPlusLabel(button.button_id, hub, button.label)
-        top_label_entity = ButtonPlusTopLabel(button.button_id, hub, button.top_label)
-
         text_entities.append(label_entity)
-        text_entities.append(top_label_entity)
-
         hub.add_label(button.button_id, label_entity)
+
+        top_label_entity = ButtonPlusTopLabel(button.button_id, hub, button.top_label)
+        text_entities.append(top_label_entity)
         hub.add_top_label(button.button_id, top_label_entity)
 
     async_add_entities(text_entities)
@@ -59,25 +59,25 @@ async def async_setup_entry(
 
 class ButtonPlusText(TextEntity):
     def __init__(self, btn_id: int, hub: ButtonPlusHub, btn_label: str, text_type: str):
-        self._btn_id = btn_id
-        self._hub = hub
         self._hub_id = hub.hub_id
+        self._hub = hub
+        self._btn_id = btn_id
         self._text_type = text_type
         self.entity_id = f"text.{text_type}_{self._hub_id}_{btn_id}"
         self._attr_name = f"text-{text_type}-{btn_id}"
         self._attr_native_value = btn_label
-        self._connector = hub.config.info.connectors[btn_id // 2]
+        self._connector = hub.config.connector_for(btn_id // 2)
         self.unique_id = self.unique_id_gen()
 
     def unique_id_gen(self):
-        match self._connector.connector_type_enum():
-            case ConnectorEnum.BAR:
+        match self._connector.connector_type():
+            case ConnectorType.BAR:
                 return self.unique_id_gen_bar()
-            case ConnectorEnum.DISPLAY:
+            case ConnectorType.DISPLAY:
                 return self.unique_id_gen_display()
 
     def unique_id_gen_bar(self):
-        return f"text_{self._hub_id}_{self._btn_id}_bar_module_{self._connector.connector_id}_{self._text_type}"
+        return f"text_{self._hub_id}_{self._btn_id}_bar_module_{self._connector.identifier()}_{self._text_type}"
 
     def unique_id_gen_display(self):
         return f"text_{self._hub_id}_{self._btn_id}_display_module_{self._text_type}"
@@ -98,17 +98,17 @@ class ButtonPlusText(TextEntity):
     def device_info(self) -> DeviceInfo:
         """Return information to link this entity with the correct device."""
 
-        identifiers: set[tuple[str, str]] = {}
+        identifiers: set[tuple[str, str]] = set()
 
-        match self._connector.connector_type_enum():
-            case ConnectorEnum.BAR:
+        match self._connector.connector_type():
+            case ConnectorType.BAR:
                 identifiers = {
                     (
                         DOMAIN,
-                        f"{self._hub.hub_id} BAR Module {self._connector.connector_id}",
+                        f"{self._hub.hub_id} BAR Module {self._connector.identifier()}",
                     )
                 }
-            case ConnectorEnum.DISPLAY:
+            case ConnectorType.DISPLAY:
                 identifiers = {(DOMAIN, f"{self._hub.hub_id} Display Module")}
 
         return DeviceInfo(

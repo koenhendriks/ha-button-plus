@@ -10,6 +10,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from . import ButtonPlusHub
+from .button_plus_api.connector_type import ConnectorType
 
 from .const import DOMAIN, MANUFACTURER
 
@@ -26,7 +27,7 @@ async def async_setup_entry(
     """Add switches for passed config_entry in HA."""
 
     hub: ButtonPlusHub = hass.data[DOMAIN][config_entry.entry_id]
-    buttons = hub.config.mqtt_buttons
+    buttons = hub.config.buttons()
 
     for button in buttons:
         # _LOGGER.debug(f"Creating Lights with parameters: {button.button_id} {button.label} {hub.hub_id}")
@@ -38,6 +39,7 @@ async def async_setup_entry(
 
 class ButtonPlusLight(LightEntity):
     def __init__(self, btn_id: int, hub: ButtonPlusHub, light_type: str):
+        connectors = hub.config.connectors_for(ConnectorType.DISPLAY, ConnectorType.BAR)
         self._btn_id = btn_id
         self._hub = hub
         self._hub_id = hub.hub_id
@@ -46,7 +48,7 @@ class ButtonPlusLight(LightEntity):
         self.entity_id = f"light.{light_type}_{self._hub_id}_{btn_id}"
         self._attr_name = f"light-{light_type}-{btn_id}"
         self._state = False
-        self._connector = hub.config.info.connectors[btn_id // 2]
+        self._connector = connectors[btn_id // 2]
 
     @property
     def is_on(self) -> bool | None:
@@ -84,17 +86,17 @@ class ButtonPlusLight(LightEntity):
             "manufacturer": MANUFACTURER,
         }
 
-        match self._connector.connector_type:
+        match self._connector.connector_type():
             case 1:
-                device_info["name"] = f"BAR Module {self._connector.connector_id}"
+                device_info["name"] = f"BAR Module {self._connector.identifier()}"
                 device_info["connections"] = {
-                    ("bar_module", self._connector.connector_id)
+                    ("bar_module", self._connector.identifier())
                 }
                 device_info["model"] = "BAR Module"
                 device_info["identifiers"] = {
                     (
                         DOMAIN,
-                        f"{self._hub.hub_id}_{self._btn_id}_bar_module_{self._connector.connector_id}",
+                        f"{self._hub.hub_id}_{self._btn_id}_bar_module_{self._connector.identifier()}",
                     )
                 }
             case 2:

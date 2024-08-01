@@ -13,11 +13,14 @@ from homeassistant import config_entries
 from homeassistant.const import CONF_IP_ADDRESS, CONF_EMAIL, CONF_PASSWORD
 from homeassistant.helpers import aiohttp_client
 from homeassistant.helpers.network import get_url
-from packaging import version
 
+from . import ModelDetection
 from .button_plus_api.api_client import ApiClient
 from .button_plus_api.local_api_client import LocalApiClient
-from .button_plus_api.model import ConnectorEnum, DeviceConfiguration, MqttBroker
+from .button_plus_api.model_interface import (
+    ConnectorType,
+    DeviceConfiguration,
+)
 from .button_plus_api.event_type import EventType
 from .const import DOMAIN
 
@@ -92,19 +95,19 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         ip, aiohttp_client.async_get_clientsession(self.hass)
                     )
                     json_config = await api_client.fetch_config()
-                    device_config: DeviceConfiguration = DeviceConfiguration.from_json(
+                    device_config: DeviceConfiguration = ModelDetection.model_for_json(
                         json_config
                     )
 
-                    self.add_broker_to_config(device_config)
-                    self.add_topics_to_core(device_config)
+                    self.set_broker(device_config)
+                    self.add_topics(device_config)
                     self.add_topics_to_buttons(device_config)
 
                     await api_client.push_config(device_config)
 
                     return self.async_create_entry(
-                        title=f"{device_config.core.name}",
-                        description=f"Base module on {ip} with id {device_config.info.device_id}",
+                        title=f"{device_config.name()}",
+                        description=f"Base module on {ip} with id {device_config.identifier()}",
                         data={"config": json_config},
                     )
 
@@ -222,138 +225,98 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         return ApiClient(aiohttp_client.async_get_clientsession(self.hass), cookie)
 
-    def validate_ip(self, ip) -> bool:
+    @staticmethod
+    def validate_ip(ip) -> bool:
         try:
             ipaddress.IPv4Address(ip)
             return True
         except ValueError:
             return False
 
-    def add_broker_to_config(
-        self, device_config: DeviceConfiguration
-    ) -> DeviceConfiguration:
+    def set_broker(self, device_config: DeviceConfiguration):
         mqtt_entry = self.mqtt_entry
         broker_port = mqtt_entry.data.get("port")
         broker_username = mqtt_entry.data.get("username", "")
         broker_password = mqtt_entry.data.get("password", "")
 
-        broker = MqttBroker(
-            broker_id="ha-button-plus",
-            url=f"mqtt://{self.broker_endpoint}/",
-            port=broker_port,
-            ws_port=9001,
-            username=broker_username,
-            password=broker_password,
+        device_config.set_broker(
+            f"mqtt://{self.broker_endpoint}/",
+            broker_port,
+            broker_username,
+            broker_password,
         )
 
-        device_config.mqtt_brokers.append(broker)
-        return device_config
+    @staticmethod
+    def add_topics(device_config: DeviceConfiguration) -> DeviceConfiguration:
+        device_id = device_config.identifier()
 
-    def add_topics_to_core(
-        self, device_config: DeviceConfiguration
-    ) -> DeviceConfiguration:
-        device_id = device_config.info.device_id
-        min_version = "1.11"
-
-        if version.parse(device_config.info.firmware) < version.parse(min_version):
-            _LOGGER.debug(
-                f"Current version {device_config.info.firmware} doesn't support the brightness, it must be at least firmware version {min_version}"
+        if device_config.supports_brightness() is False:
+            _LOGGER.info(
+                "Current firmware version doesn't support brightness settings, it must be at least firmware version 1.11"
             )
             return
 
-        device_config.core.topics.append(
-            {
-                "brokerid": "ha-button-plus",
-                "topic": f"buttonplus/{device_id}/brightness/large",
-                "payload": "",
-                "eventtype": EventType.BRIGHTNESS_LARGE_DISPLAY,
-            }
+        device_config.add_topic(
+            f"buttonplus/{device_id}/brightness/large",
+            EventType.BRIGHTNESS_LARGE_DISPLAY,
         )
-
-        device_config.core.topics.append(
-            {
-                "brokerid": "ha-button-plus",
-                "topic": f"buttonplus/{device_id}/brightness/mini",
-                "payload": "",
-                "eventtype": EventType.BRIGHTNESS_MINI_DISPLAY,
-            }
+        device_config.add_topic(
+            f"buttonplus/{device_id}/brightness/mini", EventType.BRIGHTNESS_MINI_DISPLAY
         )
-
-        device_config.core.topics.append(
-            {
-                "brokerid": "ha-button-plus",
-                "topic": f"buttonplus/{device_id}/page/status",
-                "payload": "",
-                "eventtype": EventType.PAGE_STATUS,
-            }
+        device_config.add_topic(
+            f"buttonplus/{device_id}/page/status", EventType.PAGE_STATUS
         )
+        device_config.add_topic(f"buttonplus/{device_id}/page/set", EventType.SET_PAGE)
 
-        device_config.core.topics.append(
-            {
-                "brokerid": "ha-button-plus",
-                "topic": f"buttonplus/{device_id}/page/set",
-                "payload": "",
-                "eventtype": EventType.SET_PAGE,
-            }
-        )
-
-    def add_topics_to_buttons(
-        self, device_config: DeviceConfiguration
-    ) -> DeviceConfiguration:
-        device_id = device_config.info.device_id
+    @staticmethod
+    def add_topics_to_buttons(device_config: DeviceConfiguration):
+        device_id = device_config.identifier()
 
         active_connectors = [
-            connector.connector_id
-            for connector in device_config.info.connectors
-            if connector.connector_type_enum()
-            in [ConnectorEnum.DISPLAY, ConnectorEnum.BAR]
+            connector.identifier()
+            for connector in device_config.connectors_for(
+                ConnectorType.DISPLAY, ConnectorType.BAR
+            )
         ]
 
+        # Each button should have a connector, so check if the buttons connector is present, else skip it
+        # Each connector has two buttons, and the *implicit API contract* is that connectors create buttons in
+        # ascending (and sorted) order. So connector 0 has buttons 0 and 1, connector 1 has buttons 2 and 3, etc.
+        #
+        # This means the connector ID is equal to floor(button_id / 2). Button ID's start at 0! So:
+        # button 0 and 1 are on connector 0, button 2 and 3 are on connector 1
         for button in filter(
-            lambda b: b.button_id // 2 in active_connectors, device_config.mqtt_buttons
+            lambda btn: btn.button_id // 2 in active_connectors,
+            device_config.buttons(),
         ):
             # Create topics for button main label
-            button.topics.append(
-                {
-                    "brokerid": "ha-button-plus",
-                    "topic": f"buttonplus/{device_id}/button/{button.button_id}/label",
-                    "payload": "",
-                    "eventtype": EventType.LABEL,
-                }
+            button.add_topic(
+                f"buttonplus/{device_id}/button/{button.button_id}/label",
+                EventType.LABEL,
             )
 
             # Create topics for button top label
-            button.topics.append(
-                {
-                    "brokerid": "ha-button-plus",
-                    "topic": f"buttonplus/{device_id}/button/{button.button_id}/top_label",
-                    "payload": "",
-                    "eventtype": EventType.TOPLABEL,
-                }
+            button.add_topic(
+                f"buttonplus/{device_id}/button/{button.button_id}/top_label",
+                EventType.TOPLABEL,
             )
 
             # Create topics for button click
-            button.topics.append(
-                {
-                    "brokerid": "ha-button-plus",
-                    "topic": f"buttonplus/{device_id}/button/{button.button_id}/click",
-                    "payload": "press",
-                    "eventtype": EventType.CLICK,
-                }
+            button.add_topic(
+                f"buttonplus/{device_id}/button/{button.button_id}/click",
+                EventType.CLICK,
+                "press",
             )
 
             # Create topics for button click
-            button.topics.append({
-                "brokerid": "ha-button-plus",
-                "topic": f"buttonplus/{device_id}/button/{button.button_id}/long_press",
-                "payload": "press",
-                "eventtype": EventType.LONG_PRESS
-            })
-
-        return device_config
+            button.add_topic(
+                f"buttonplus/{device_id}/button/{button.button_id}/long_press",
+                EventType.LONG_PRESS,
+                "press",
+            )
 
     def get_mqtt_endpoint(self, endpoint: str) -> str:
-        # Internal add-on is not reachable from the Button+ device so we use the hass ip
+        # Internal add-on is not reachable from the Button+ device, so we use the hass ip
         if endpoint in self.local_brokers:
             _LOGGER.debug(
                 f"mqtt host is internal so use {self.hass.config.api.host} instead of {endpoint}"

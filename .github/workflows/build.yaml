@@ -11,9 +11,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12.4'
+          cache: 'pip' # caching pip dependencies, speeds things up
+      - name: Install dependencies
+        run: pip install .
       - name: Install Hatch
         run: pipx install hatch
-      #- name: Run tests
-      #  run: hatch run test:test
+      - name: Run tests
+        run: hatch test
       - name: Build dist
         run: hatch build

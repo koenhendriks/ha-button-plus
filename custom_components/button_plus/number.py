@@ -10,7 +10,6 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.components.mqtt import client as mqtt
-from packaging import version
 from .button_plus_api.event_type import EventType
 from . import ButtonPlusHub
 
@@ -30,10 +29,9 @@ async def async_setup_entry(
 
     hub: ButtonPlusHub = hass.data[DOMAIN][config_entry.entry_id]
 
-    min_version = "1.11"
-    if version.parse(hub.config.info.firmware) < version.parse(min_version):
+    if hub.config.supports_brightness() is False:
         _LOGGER.info(
-            f"Current version {hub.config.info.firmware} doesn't support the brightness, it must be at least firmware version {min_version}"
+            "Current firmware version doesn't support brightness settings, it must be at least firmware version 1.11"
         )
         return
 
@@ -44,7 +42,7 @@ async def async_setup_entry(
 
     large = ButtonPlusLargeBrightness(hub)
     brightness.append(large)
-    hub.add_brightness("large", mini)
+    hub.add_brightness("large", large)
 
     async_add_entities(brightness)
 
@@ -57,7 +55,7 @@ class ButtonPlusBrightness(NumberEntity):
         self.entity_id = f"brightness.{brightness_type}_{self._hub_id}"
         self._attr_name = f"brightness-{brightness_type}"
         self.event_type = event_type
-        self._topics = hub.config.core.topics
+        self._topics = hub.config.topics()
         self._attr_icon = "mdi:television-ambient-light"
         self._attr_unique_id = f"brightness_{brightness_type}-{self._hub_id}"
 
@@ -85,7 +83,7 @@ class ButtonPlusBrightness(NumberEntity):
     def device_info(self) -> DeviceInfo:
         """Return information to link this entity with the correct device."""
 
-        identifiers: set[tuple[str, str]] = {}
+        identifiers: set[tuple[str, str]] = set()
 
         match self.event_type:
             case EventType.BRIGHTNESS_MINI_DISPLAY:
