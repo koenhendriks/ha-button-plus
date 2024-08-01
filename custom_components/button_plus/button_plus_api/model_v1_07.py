@@ -11,6 +11,7 @@ from .model_interface import Button
 
 _LOGGER: logging.Logger = logging.getLogger(__package__)
 
+
 class Connector:
     def __init__(self, identifier: int, connector_type: ConnectorType):
         self._identifier = identifier
@@ -385,7 +386,9 @@ class DeviceConfiguration:
         )
 
     def connectors_for(self, *connector_type: ConnectorType) -> List[Connector]:
-        _LOGGER.debug(f"Filter all {len(self.info.connectors)} connectors by type {connector_type}")
+        _LOGGER.debug(
+            f"Filter all {len(self.info.connectors)} connectors by type {connector_type}"
+        )
         return [
             connector
             for connector in self.info.connectors

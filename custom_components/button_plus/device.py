@@ -16,7 +16,9 @@ class BarModuleDevice:
         hub: ButtonPlusHub,
         connector_id: int,
     ) -> None:
-        _LOGGER.info(f"Init BarModuleDevice '{hub.hub_id}' with connector '{connector_id}'")
+        _LOGGER.info(
+            f"Init BarModuleDevice '{hub.hub_id}' with connector '{connector_id}'"
+        )
         self.device_registry = dr.async_get(hass)
         self.device = self.device_registry.async_get_or_create(
             config_entry_id=entry.entry_id,

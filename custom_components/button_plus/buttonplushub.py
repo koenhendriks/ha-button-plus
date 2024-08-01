@@ -62,16 +62,22 @@ class ButtonPlusHub:
         self.display_module = next(
             (
                 self.create_display_module(hass, entry, self)
-                for _ in ButtonPlusHub.connector_identifiers_for(ConnectorType.DISPLAY, self)
+                for _ in ButtonPlusHub.connector_identifiers_for(
+                    ConnectorType.DISPLAY, self
+                )
             ),
             None,
         )
         self.display_bar = [
             (connector_id, self.create_bar_module(hass, entry, self, connector_id))
-            for connector_id in ButtonPlusHub.connector_identifiers_for(ConnectorType.BAR, self)
+            for connector_id in ButtonPlusHub.connector_identifiers_for(
+                ConnectorType.BAR, self
+            )
         ]
 
-        _LOGGER.info(f"Hub {self._name} created with {len(self.display_bar)} bar modules")
+        _LOGGER.info(
+            f"Hub {self._name} created with {len(self.display_bar)} bar modules"
+        )
 
     @staticmethod
     def create_display_module(
@@ -82,7 +88,7 @@ class ButtonPlusHub:
 
         device = device_registry.async_get_or_create(
             config_entry_id=entry.entry_id,
-            #connections={(DOMAIN, hub.config.identifier())},
+            # connections={(DOMAIN, hub.config.identifier())},
             name=f"{hub.name} Display Module",
             model="Display Module",
             manufacturer=MANUFACTURER,
@@ -100,12 +106,14 @@ class ButtonPlusHub:
         hub: ButtonPlusHub,
         connector_id: int,
     ) -> DeviceEntry:
-        _LOGGER.warning(f"Create bar module from {hub.hub_id} with connector '{connector_id}'")
+        _LOGGER.warning(
+            f"Create bar module from {hub.hub_id} with connector '{connector_id}'"
+        )
         device_registry = DeviceRegistry.async_get(hass)
 
         device = device_registry.async_get_or_create(
             config_entry_id=entry.entry_id,
-            #connections={(DOMAIN, hub.config.identifier())},
+            # connections={(DOMAIN, hub.config.identifier())},
             name=f"{hub._name} BAR Module {connector_id}",
             model="Bar module",
             manufacturer=MANUFACTURER,
@@ -117,7 +125,9 @@ class ButtonPlusHub:
         return device
 
     @staticmethod
-    def connector_identifiers_for(connector_type: ConnectorType, hub: ButtonPlusHub) -> List[int]:
+    def connector_identifiers_for(
+        connector_type: ConnectorType, hub: ButtonPlusHub
+    ) -> List[int]:
         return [
             connector.identifier()
             for connector in hub.config.connectors_for(connector_type)

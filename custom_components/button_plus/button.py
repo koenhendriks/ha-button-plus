@@ -39,7 +39,9 @@ async def async_setup_entry(
 
     active_connectors = [
         connector.identifier()
-        for connector in hub.config.connectors_for(ConnectorType.DISPLAY, ConnectorType.BAR)
+        for connector in hub.config.connectors_for(
+            ConnectorType.DISPLAY, ConnectorType.BAR
+        )
     ]
 
     buttons = filter(
