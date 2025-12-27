@@ -1,3 +1,8 @@
+# Archived
+
+> [!WARNING]
+> Ever since [MQTT Discovery](https://www.home-assistant.io/integrations/mqtt/#mqtt-discovery) has been added to the Button+ firmware, this repository has no longer been actively maintened as it adds no extra value to the out-of-the-box supported functionality.
+
 # Button+ integration for Home Assistant
 
 ![img.png](img.png)  
